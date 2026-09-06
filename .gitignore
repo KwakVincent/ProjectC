@@ -1,0 +1,31 @@
+# Visual Studio / MSBuild 빌드 산출물
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.tlog
+*.lastbuildstate
+*.iobj
+*.ipdb
+*.log
+
+# 빌드 출력 디렉터리
+/VKCommander/x64/
+/VKCommander/VKCommander/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# IDE 설정 및 캐시
+.vs/
+.idea/
+*.user
+*.DotSettings.user
+/VKCommander/.idea/
+/VKCommander/.vs/
+
+# ThirdParty는 빌드 산출물 무시 규칙에서 예외 처리
+!**/ThirdParty/**
+/VKCommander/VKCommander.vcxproj
+/VKCommander/VKCommander.vcxproj.filters
