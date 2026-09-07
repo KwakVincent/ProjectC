@@ -29,3 +29,8 @@ x86/
 !**/ThirdParty/**
 /VKCommander/VKCommander.vcxproj
 /VKCommander/VKCommander.vcxproj.filters
+/BattleRobot/Intermediate
+/BattleRobot/Saved
+/BattleRobot/Binaries
+/BattleRobot/DerivedDataCache
+/BattleRobot/*.vsconfig
