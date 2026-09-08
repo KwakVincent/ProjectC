@@ -221,7 +221,7 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData)
         return;
     }
 
-    if (AudioData.size() < FSileroVAD::SAMPLE_RATE * 0.5f)
+    if (AudioData.size() < static_cast<size_t>(FSileroVAD::SAMPLE_RATE * 0.3f))
     {
         return;
     }
@@ -229,10 +229,16 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData)
     std::lock_guard<std::mutex> WhisperLock(mWhisperMutex);
 
     whisper_full_params Params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+    unsigned int const HardwareThreads = std::thread::hardware_concurrency();
+    int const ThreadCount = HardwareThreads > 0 ? static_cast<int>(FMath::Clamp(HardwareThreads, 4u, 8u)) : 4;
+    Params.n_threads = ThreadCount;
     Params.language = "ko";
-    Params.n_threads = 4;
     Params.no_context = true;
     Params.single_segment = true;
+    Params.no_timestamps = true;
+    Params.max_tokens = 16;
+    Params.temperature = 0.0f;
+    Params.temperature_inc = 0.0f;
     Params.print_progress = false;
     Params.print_realtime = false;
     Params.print_timestamps = false;
