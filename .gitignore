@@ -34,3 +34,8 @@ x86/
 /BattleRobot/Binaries
 /BattleRobot/DerivedDataCache
 /BattleRobot/*.vsconfig
+/BattleRobot/Content/Collections
+/BattleRobot/Content/Developers
+# AI Models (Only ignore large weight data files >100MB)
+*.onnx.data
+*.data

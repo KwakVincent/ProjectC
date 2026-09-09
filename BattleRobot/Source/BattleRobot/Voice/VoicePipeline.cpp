@@ -26,6 +26,7 @@ FVoicePipeline::FVoicePipeline(FString const& VadModelPath, FString const& Whisp
     , mWhisperContext(nullptr)
     , mIsSpeaking(false)
     , mSilenceChunkCount(0)
+    , mSpeechStartTime(0.0)
     , mOnSpeechRecognized(nullptr)
     , mAudioContext(nullptr)
     , mAudioDevice(nullptr)
@@ -173,6 +174,7 @@ void FVoicePipeline::ProcessAudioChunk(float const* ChunkData)
         if (!mIsSpeaking)
         {
             mIsSpeaking = true;
+            mSpeechStartTime = FPlatformTime::Seconds();
             UE_LOG(LogTemp, Log, TEXT("[음성 감지 시작] 말하는 중..."));
         }
         mSilenceChunkCount = 0;
@@ -197,7 +199,8 @@ void FVoicePipeline::ProcessAudioChunk(float const* ChunkData)
     {
         mIsSpeaking = false;
         mSilenceChunkCount = 0;
-        UE_LOG(LogTemp, Log, TEXT("[음성 종료 감지] 디코딩 시작..."));
+        double const VadDurationMs = (FPlatformTime::Seconds() - mSpeechStartTime) * 1000.0;
+        UE_LOG(LogTemp, Log, TEXT("[음성 종료 감지] VAD 감지 시간: %.1f ms, 디코딩 시작..."), VadDurationMs);
 
         std::vector<float> AudioToProcess;
         {
@@ -207,14 +210,14 @@ void FVoicePipeline::ProcessAudioChunk(float const* ChunkData)
         }
 
         mVAD.ResetState();
-        std::thread([this, Data = std::move(AudioToProcess)]()
+        std::thread([this, Data = std::move(AudioToProcess), VadDurationMs]()
         {
-            ExecuteSTT(Data);
+            ExecuteSTT(Data, VadDurationMs);
         }).detach();
     }
 }
 
-void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData)
+void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData, double VadDurationMs)
 {
     if (!mWhisperContext)
     {
@@ -226,6 +229,7 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData)
         return;
     }
 
+    double const SttStart = FPlatformTime::Seconds();
     std::lock_guard<std::mutex> WhisperLock(mWhisperMutex);
 
     whisper_full_params Params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
@@ -236,7 +240,7 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData)
     Params.no_context = true;
     Params.single_segment = true;
     Params.no_timestamps = true;
-    Params.max_tokens = 16;
+    Params.max_tokens = 48;
     Params.temperature = 0.0f;
     Params.temperature_inc = 0.0f;
     Params.print_progress = false;
@@ -261,10 +265,11 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData)
     }
 
     ResultText.TrimStartAndEndInline();
-    UE_LOG(LogTemp, Log, TEXT(">> [Whisper STT 인식 결과]: %s"), *ResultText);
+    double const SttDurationMs = (FPlatformTime::Seconds() - SttStart) * 1000.0;
+    UE_LOG(LogTemp, Log, TEXT(">> [Whisper STT 디코딩 완료 (소요시간: %.1f ms)]: %s"), SttDurationMs, *ResultText);
 
     if (mOnSpeechRecognized)
     {
-        mOnSpeechRecognized(ResultText);
+        mOnSpeechRecognized(ResultText, VadDurationMs, SttDurationMs);
     }
 }

@@ -15,9 +15,9 @@ class BATTLEROBOT_API FVoicePipeline
 public:
     static constexpr float VAD_THRESHOLD = 0.5f;
     static constexpr float RMS_THRESHOLD = 0.015f;
-    static constexpr int32_t SILENCE_CHUNKS_LIMIT = 11;
+    static constexpr int32_t SILENCE_CHUNKS_LIMIT = 15;
 
-    using FOnSpeechRecognized = TFunction<void(FString const&)>;
+    using FOnSpeechRecognized = TFunction<void(FString const&, double VadDurationMs, double SttDurationMs)>;
 
     FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath);
     ~FVoicePipeline();
@@ -29,8 +29,10 @@ public:
     void SetOnSpeechRecognized(FOnSpeechRecognized Callback);
 
 protected:
-    void ExecuteSTT(std::vector<float> const& AudioData);
+    void ExecuteSTT(std::vector<float> const& AudioData, double VadDurationMs);
     void OnAudioInput(float const* InputData, size_t FrameCount);
+
+    double mSpeechStartTime;
 
     FSileroVAD mVAD;
     whisper_context* mWhisperContext;

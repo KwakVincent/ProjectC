@@ -56,9 +56,14 @@ public class BattleRobot : ModuleRules
 		string OnnxPath = Path.Combine(ThirdPartyPath, "Onnx");
 		PublicIncludePaths.Add(Path.Combine(OnnxPath, "Include"));
 		PublicAdditionalLibraries.Add(Path.Combine(OnnxPath, "Lib", "onnxruntime.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(OnnxPath, "Lib", "onnxruntime-genai.lib"));
 		PublicDelayLoadDLLs.Add("onnxruntime.dll");
+		PublicDelayLoadDLLs.Add("onnxruntime-genai.dll");
 
 		string OnnxDllSource = Path.Combine(OnnxPath, "Lib", "onnxruntime.dll");
 		RuntimeDependencies.Add("$(TargetOutputDir)/onnxruntime.dll", OnnxDllSource);
+
+		string OnnxGenAiDllSource = Path.Combine(OnnxPath, "Lib", "onnxruntime-genai.dll");
+		RuntimeDependencies.Add("$(TargetOutputDir)/onnxruntime-genai.dll", OnnxGenAiDllSource);
 	}
 }
