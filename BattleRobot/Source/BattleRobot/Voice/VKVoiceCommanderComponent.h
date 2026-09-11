@@ -4,12 +4,14 @@
 #include "Components/ActorComponent.h"
 #include "VoiceCommandClassifier.h"
 #include "VoicePipeline.h"
-#include "QwenOnDeviceRunner.h"
+#include "VKEmbeddingEncoderRunner.h"
 #include "VKVoiceCommanderComponent.generated.h"
 
 class ABattleRobotCharacter;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnVoiceCommandExecuted, EBotVoiceCommand, Command, FString const&, RawText);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnActionTrained, FName, ActionId, float, Speed, float, Duration, bool, bKeepUntilStop);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActionExecutionImperfect, FName, ActionId);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class BATTLEROBOT_API UVKVoiceCommanderComponent : public UActorComponent
@@ -29,13 +31,27 @@ public:
     void StopVoiceRecognition();
 
     UFUNCTION(BlueprintCallable, Category="Voice")
+    void SetTrainingMode(bool const bEnable);
+
+    UFUNCTION(BlueprintCallable, Category="Voice")
+    bool IsTrainingMode() const;
+
+    UFUNCTION(BlueprintCallable, Category="Voice")
     class UVKActionPoolComponent* GetActionPool() const;
 
     UFUNCTION(BlueprintCallable, Category="Voice")
     class UVKActiveActionComponent* GetActiveAction() const;
 
+    FVKEmbeddingEncoderRunner* GetEncoderRunner() const;
+
     UPROPERTY(BlueprintAssignable, Category="Voice")
     FOnVoiceCommandExecuted OnVoiceCommandExecuted;
+
+    UPROPERTY(BlueprintAssignable, Category="Voice")
+    FOnActionTrained OnActionTrained;
+
+    UPROPERTY(BlueprintAssignable, Category="Voice")
+    FOnActionExecutionImperfect OnActionExecutionImperfect;
 
 protected:
     virtual void BeginPlay() override;
@@ -63,10 +79,14 @@ protected:
     TObjectPtr<class UVKActiveActionComponent> mActiveAction;
 
     TUniquePtr<FVoicePipeline> mVoicePipeline;
-    TUniquePtr<FQwenOnDeviceRunner> mQwenRunner;
+    TUniquePtr<FVKEmbeddingEncoderRunner> mEncoderRunner;
     TUniquePtr<IVoiceCommandClassifier> mClassifier;
     TWeakObjectPtr<ABattleRobotCharacter> mOwnerCharacter;
-
     EBotVoiceCommand mActiveCommand;
     float mRemainingMoveTime;
+
+    bool mbIsTrainingMode = false;
+    bool mbIsContinuousMoving = false;
+    FVector mContinuousDirection = FVector::ZeroVector;
+    float mContinuousSpeedMultiplier = 1.0f;
 };

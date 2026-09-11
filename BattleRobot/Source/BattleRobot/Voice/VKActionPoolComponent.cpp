@@ -1,4 +1,5 @@
 #include "VKActionPoolComponent.h"
+#include "VKEmbeddingEncoderRunner.h"
 
 UVKActionPoolComponent::UVKActionPoolComponent()
 {
@@ -28,6 +29,7 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     MoveDef.mAdaptiveDuration = 1.0f;
     MoveDef.mbIsUnlocked = true;
     MoveDef.mbCanTurn = true;
+    MoveDef.mTriggerPhrases = { TEXT("앞으로 가"), TEXT("전진해"), TEXT("직진"), TEXT("가자"), TEXT("forward"), TEXT("go") };
     RegisterAction(MoveDef);
 
     FBotMovementActionDef DashDef;
@@ -37,8 +39,9 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     DashDef.mSpeedMultiplier = 2.0f;
     DashDef.mDefaultDuration = 1.0f;
     DashDef.mAdaptiveDuration = 1.0f;
-    DashDef.mbIsUnlocked = false;
+    DashDef.mbIsUnlocked = true;
     DashDef.mbCanTurn = false;
+    DashDef.mTriggerPhrases = { TEXT("대시해"), TEXT("돌진해"), TEXT("앞으로 뛰어"), TEXT("달려"), TEXT("dash") };
     RegisterAction(DashDef);
 
     FBotMovementActionDef EvadeDef;
@@ -48,8 +51,9 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     EvadeDef.mSpeedMultiplier = 2.5f;
     EvadeDef.mDefaultDuration = 0.6f;
     EvadeDef.mAdaptiveDuration = 0.6f;
-    EvadeDef.mbIsUnlocked = false;
+    EvadeDef.mbIsUnlocked = true;
     EvadeDef.mbCanTurn = true;
+    EvadeDef.mTriggerPhrases = { TEXT("긴급 회피"), TEXT("구르기"), TEXT("피해"), TEXT("닷지"), TEXT("evade") };
     RegisterAction(EvadeDef);
 
     FBotMovementActionDef FallBackDef;
@@ -59,8 +63,9 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     FallBackDef.mSpeedMultiplier = 0.8f;
     FallBackDef.mDefaultDuration = 1.0f;
     FallBackDef.mAdaptiveDuration = 1.0f;
-    FallBackDef.mbIsUnlocked = false;
+    FallBackDef.mbIsUnlocked = true;
     FallBackDef.mbCanTurn = true;
+    FallBackDef.mTriggerPhrases = { TEXT("후퇴해"), TEXT("물러서"), TEXT("거리 벌려"), TEXT("빠져"), TEXT("back off") };
     RegisterAction(FallBackDef);
 
     FBotMovementActionDef StopDef;
@@ -72,6 +77,7 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     StopDef.mAdaptiveDuration = 0.0f;
     StopDef.mbIsUnlocked = true;
     StopDef.mbCanTurn = false;
+    StopDef.mTriggerPhrases = { TEXT("정지"), TEXT("멈춰"), TEXT("스톱"), TEXT("그만"), TEXT("서"), TEXT("stop") };
     RegisterAction(StopDef);
 }
 
@@ -219,3 +225,255 @@ FString UVKActionPoolComponent::BuildLLMActionCatalog() const
 
     return CatalogText;
 }
+
+bool UVKActionPoolComponent::RegisterCustomAction(FBotMovementActionDef const& NewAction, TArray<FString> const& TriggerPhrases)
+{
+    if (NewAction.mActionId.IsNone())
+    {
+        return false;
+    }
+
+    FBotMovementActionDef CustomAction = NewAction;
+    CustomAction.mTriggerPhrases = TriggerPhrases;
+    CustomAction.mbIsUnlocked = true;
+    CustomAction.mProficiency = 0.5f;
+    CustomAction.mSuccessfulUses = 0;
+    CustomAction.mTargetSpeedMultiplier = (NewAction.mSpeedMultiplier > 0.0f) ? NewAction.mSpeedMultiplier : 1.0f;
+    CustomAction.mTargetDuration = NewAction.mDefaultDuration;
+    CustomAction.mbKeepUntilStop = NewAction.mbKeepUntilStop;
+
+    return RegisterAction(CustomAction);
+}
+
+bool UVKActionPoolComponent::AddTriggerPhrase(FName const& ActionId, FString const& NewPhrase)
+{
+    if (ActionId.IsNone() || NewPhrase.IsEmpty())
+    {
+        return false;
+    }
+
+    FBotMovementActionDef* FoundDef = mActionMap.Find(ActionId);
+    if (FoundDef == nullptr)
+    {
+        return false;
+    }
+
+    FoundDef->mTriggerPhrases.AddUnique(NewPhrase);
+    return true;
+}
+
+bool UVKActionPoolComponent::RemoveTriggerPhrase(FName const& ActionId, FString const& Phrase)
+{
+    if (ActionId.IsNone() || Phrase.IsEmpty())
+    {
+        return false;
+    }
+
+    FBotMovementActionDef* FoundDef = mActionMap.Find(ActionId);
+    if (FoundDef == nullptr)
+    {
+        return false;
+    }
+
+    int32 const RemovedCount = FoundDef->mTriggerPhrases.Remove(Phrase);
+    return RemovedCount > 0;
+}
+
+TArray<FString> UVKActionPoolComponent::GetTriggerPhrases(FName const& ActionId) const
+{
+    if (ActionId.IsNone())
+    {
+        return TArray<FString>();
+    }
+
+    FBotMovementActionDef const* FoundDef = mActionMap.Find(ActionId);
+    if (FoundDef == nullptr)
+    {
+        return TArray<FString>();
+    }
+
+    return FoundDef->mTriggerPhrases;
+}
+
+void UVKActionPoolComponent::CacheActionEmbeddings(FVKEmbeddingEncoderRunner* EncoderRunner)
+{
+    if (EncoderRunner == nullptr || !EncoderRunner->IsInitialized())
+    {
+        return;
+    }
+
+    mAnchorCache.Empty();
+
+    for (TPair<FName, FBotMovementActionDef> const& Pair : mActionMap)
+    {
+        FName const ActionId = Pair.Key;
+        FBotMovementActionDef const& Def = Pair.Value;
+
+        FActionAnchorEntry AnchorEntry;
+        AnchorEntry.mActionId = ActionId;
+
+        for (FString const& Phrase : Def.mTriggerPhrases)
+        {
+            TArray<float> Embedding;
+            if (EncoderRunner->GetSentenceEmbedding(Phrase, Embedding))
+            {
+                FActionPhraseEmbedding PhraseEmbed;
+                PhraseEmbed.mPhrase = Phrase;
+                PhraseEmbed.mVector = MoveTemp(Embedding);
+                AnchorEntry.mPhraseEmbeddings.Add(MoveTemp(PhraseEmbed));
+            }
+        }
+
+        mAnchorCache.Add(ActionId, MoveTemp(AnchorEntry));
+    }
+}
+
+bool UVKActionPoolComponent::FindBestMatchingAction(
+    TArray<float> const& QueryEmbedding,
+    float const SimilarityThreshold,
+    FName& OutActionId,
+    float& OutSimilarity) const
+{
+    OutActionId = NAME_None;
+    OutSimilarity = -1.0f;
+
+    if (QueryEmbedding.IsEmpty() || mAnchorCache.IsEmpty())
+    {
+        return false;
+    }
+
+    int32 const Dim = QueryEmbedding.Num();
+    float BestSimilarity = -1.0f;
+    FName BestAction = NAME_None;
+
+    for (TPair<FName, FActionAnchorEntry> const& AnchorPair : mAnchorCache)
+    {
+        FName const ActionId = AnchorPair.Key;
+        if (!IsActionUnlocked(ActionId))
+        {
+            continue;
+        }
+
+        FActionAnchorEntry const& Anchor = AnchorPair.Value;
+        for (FActionPhraseEmbedding const& PhraseEmbed : Anchor.mPhraseEmbeddings)
+        {
+            if (PhraseEmbed.mVector.Num() != Dim)
+            {
+                continue;
+            }
+
+            float DotProduct = 0.0f;
+            for (int32 i = 0; i < Dim; ++i)
+            {
+                DotProduct += QueryEmbedding[i] * PhraseEmbed.mVector[i];
+            }
+
+            if (DotProduct > BestSimilarity)
+            {
+                BestSimilarity = DotProduct;
+                BestAction = ActionId;
+            }
+        }
+    }
+
+    if (BestAction.IsNone() || BestSimilarity < SimilarityThreshold)
+    {
+        return false;
+    }
+
+    OutActionId = BestAction;
+    OutSimilarity = BestSimilarity;
+    return true;
+}
+
+bool UVKActionPoolComponent::EvaluateActionPerformance(
+    FName const& ActionId,
+    float& OutSpeed,
+    float& OutDuration,
+    bool& bOutKeepUntilStop,
+    bool& bOutCriticalFail) const
+{
+    OutSpeed = 1.0f;
+    OutDuration = 1.0f;
+    bOutKeepUntilStop = false;
+    bOutCriticalFail = false;
+
+    FBotMovementActionDef const* FoundDef = mActionMap.Find(ActionId);
+    if (FoundDef == nullptr)
+    {
+        return false;
+    }
+
+    float const CriticalFailChance = 0.05f * (1.0f - FoundDef->mProficiency);
+    if (FMath::FRand() < CriticalFailChance)
+    {
+        bOutCriticalFail = true;
+        OutSpeed = 0.0f;
+        OutDuration = 0.4f;
+        bOutKeepUntilStop = false;
+        return true;
+    }
+
+    float const SkillRatio = FMath::Clamp(FoundDef->mProficiency, 0.4f, 1.0f);
+    OutSpeed = FMath::Lerp(1.0f, FoundDef->mTargetSpeedMultiplier, SkillRatio);
+    bOutKeepUntilStop = FoundDef->mbKeepUntilStop;
+
+    if (FoundDef->mbKeepUntilStop)
+    {
+        OutDuration = 0.0f;
+    }
+    else
+    {
+        float const MinDuration = FMath::Min(0.5f, FoundDef->mTargetDuration);
+        OutDuration = FMath::Lerp(MinDuration, FoundDef->mTargetDuration, SkillRatio);
+    }
+
+    return true;
+}
+
+void UVKActionPoolComponent::RecordActionSuccess(FName const& ActionId, TArray<float> const& UtteranceEmbedding)
+{
+    FBotMovementActionDef* FoundDef = mActionMap.Find(ActionId);
+    if (FoundDef == nullptr)
+    {
+        return;
+    }
+
+    FoundDef->mSuccessfulUses++;
+    FoundDef->mProficiency = FMath::Min(1.0f, FoundDef->mProficiency + 0.05f);
+
+    if (UtteranceEmbedding.IsEmpty())
+    {
+        return;
+    }
+
+    FActionAnchorEntry* FoundAnchor = mAnchorCache.Find(ActionId);
+    if (FoundAnchor == nullptr || FoundAnchor->mPhraseEmbeddings.IsEmpty())
+    {
+        return;
+    }
+
+    int32 const Dim = UtteranceEmbedding.Num();
+    for (FActionPhraseEmbedding& PhraseEmbed : FoundAnchor->mPhraseEmbeddings)
+    {
+        if (PhraseEmbed.mVector.Num() != Dim)
+        {
+            continue;
+        }
+
+        float NormSq = 0.0f;
+        for (int32 i = 0; i < Dim; ++i)
+        {
+            PhraseEmbed.mVector[i] = PhraseEmbed.mVector[i] * 0.9f + UtteranceEmbedding[i] * 0.1f;
+            NormSq += PhraseEmbed.mVector[i] * PhraseEmbed.mVector[i];
+        }
+
+        float const InvNorm = (NormSq > 1e-12f) ? FMath::InvSqrt(NormSq) : 0.0f;
+        for (int32 i = 0; i < Dim; ++i)
+        {
+            PhraseEmbed.mVector[i] *= InvNorm;
+        }
+    }
+}
+
+

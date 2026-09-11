@@ -1,7 +1,115 @@
 #include "VKActionSelector.h"
 #include "VKActionPoolComponent.h"
+#include "VKEmbeddingEncoderRunner.h"
 
 UVKActionSelector::UVKActionSelector() = default;
+
+FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
+    FString const& RawVoiceText,
+    UVKActionPoolComponent const* ActionPool,
+    FVKEmbeddingEncoderRunner* EncoderRunner,
+    float const SimilarityThreshold)
+{
+    FBotActionParseResult Result;
+    Result.mbSuccess = false;
+
+    FString TrimmedText = RawVoiceText;
+    TrimmedText.TrimStartAndEndInline();
+    if (TrimmedText.IsEmpty())
+    {
+        return Result;
+    }
+
+    FName ResolvedActionId = NAME_None;
+    float ResolvedSimilarity = -1.0f;
+
+    if (EncoderRunner != nullptr && EncoderRunner->IsInitialized() && ActionPool != nullptr)
+    {
+        TArray<float> QueryEmbedding;
+        if (EncoderRunner->GetSentenceEmbedding(TrimmedText, QueryEmbedding))
+        {
+            ActionPool->FindBestMatchingAction(QueryEmbedding, SimilarityThreshold, ResolvedActionId, ResolvedSimilarity);
+        }
+    }
+
+    if (ResolvedActionId.IsNone())
+    {
+        if (TrimmedText.Contains(TEXT("정지")) || TrimmedText.Contains(TEXT("멈춰")) || TrimmedText.Contains(TEXT("스톱")) || TrimmedText.Contains(TEXT("stop")))
+        {
+            ResolvedActionId = FName(TEXT("Stop"));
+        }
+        else if (TrimmedText.Contains(TEXT("대시")) || TrimmedText.Contains(TEXT("돌진")) || TrimmedText.Contains(TEXT("뛰어")) || TrimmedText.Contains(TEXT("dash")))
+        {
+            ResolvedActionId = FName(TEXT("Dash"));
+        }
+        else if (TrimmedText.Contains(TEXT("회피")) || TrimmedText.Contains(TEXT("구르")) || TrimmedText.Contains(TEXT("evade")))
+        {
+            ResolvedActionId = FName(TEXT("Evade"));
+        }
+        else if (TrimmedText.Contains(TEXT("후퇴")) || TrimmedText.Contains(TEXT("물러서")) || TrimmedText.Contains(TEXT("빠져")))
+        {
+            ResolvedActionId = FName(TEXT("FallBack"));
+        }
+        else
+        {
+            ResolvedActionId = FName(TEXT("Move"));
+        }
+    }
+
+    Result.mActionId = ResolvedActionId;
+    Result.mDirection = ExtractDirectionFromText(TrimmedText, ResolvedActionId);
+    Result.mDeltaTicks = ExtractDeltaTicksFromText(TrimmedText);
+    Result.mbSuccess = true;
+
+    return Result;
+}
+
+FVector UVKActionSelector::ExtractDirectionFromText(FString const& Text, FName const& ActionId)
+{
+    if (ActionId == FName(TEXT("Stop")))
+    {
+        return FVector::ZeroVector;
+    }
+
+    if (ActionId == FName(TEXT("FallBack")))
+    {
+        return FVector(-1.0f, 0.0f, 0.0f);
+    }
+
+    FString const Lower = Text.ToLower();
+    if (Lower.Contains(TEXT("뒤")) || Lower.Contains(TEXT("후진")) || Lower.Contains(TEXT("back")))
+    {
+        return FVector(-1.0f, 0.0f, 0.0f);
+    }
+
+    if (Lower.Contains(TEXT("왼")) || Lower.Contains(TEXT("좌")) || Lower.Contains(TEXT("left")))
+    {
+        return FVector(0.0f, -1.0f, 0.0f);
+    }
+
+    if (Lower.Contains(TEXT("오른")) || Lower.Contains(TEXT("우")) || Lower.Contains(TEXT("right")))
+    {
+        return FVector(0.0f, 1.0f, 0.0f);
+    }
+
+    return FVector(1.0f, 0.0f, 0.0f);
+}
+
+int32 UVKActionSelector::ExtractDeltaTicksFromText(FString const& Text)
+{
+    if (Text.Contains(TEXT("조금만")) || Text.Contains(TEXT("살짝만")) || Text.Contains(TEXT("살짝")) || Text.Contains(TEXT("조금")))
+    {
+        return 1;
+    }
+
+    if (Text.Contains(TEXT("더")) || Text.Contains(TEXT("계속")) || Text.Contains(TEXT("훨씬")) || Text.Contains(TEXT("길게")))
+    {
+        return 3;
+    }
+
+    return 0;
+}
+
 
 FString UVKActionSelector::BuildPrompt(FString const& UserVoiceText, UVKActionPoolComponent const* ActionPool)
 {

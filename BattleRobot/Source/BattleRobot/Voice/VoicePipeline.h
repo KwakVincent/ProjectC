@@ -15,7 +15,7 @@ class BATTLEROBOT_API FVoicePipeline
 public:
     static constexpr float VAD_THRESHOLD = 0.5f;
     static constexpr float RMS_THRESHOLD = 0.015f;
-    static constexpr int32_t SILENCE_CHUNKS_LIMIT = 15;
+    static constexpr int32_t SILENCE_CHUNKS_LIMIT = 7;
 
     using FOnSpeechRecognized = TFunction<void(FString const&, double VadDurationMs, double SttDurationMs)>;
 

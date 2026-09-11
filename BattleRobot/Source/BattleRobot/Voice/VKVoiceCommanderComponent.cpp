@@ -4,7 +4,8 @@
 #include "VKActionPoolComponent.h"
 #include "VKActiveActionComponent.h"
 #include "VKActionSelector.h"
-#include "QwenOnDeviceRunner.h"
+#include "VKEmbeddingEncoderRunner.h"
+#include "VKActionSpeechLearner.h"
 #include "Misc/Paths.h"
 #include "Async/Async.h"
 
@@ -12,14 +13,29 @@ UVKVoiceCommanderComponent::UVKVoiceCommanderComponent()
     : mMoveDuration(2.0f)
     , mActionPool(nullptr)
     , mActiveAction(nullptr)
-    , mQwenRunner(nullptr)
+    , mEncoderRunner(nullptr)
     , mActiveCommand(EBotVoiceCommand::None)
     , mRemainingMoveTime(0.0f)
+    , mbIsTrainingMode(false)
+    , mbIsContinuousMoving(false)
+    , mContinuousDirection(FVector::ZeroVector)
+    , mContinuousSpeedMultiplier(1.0f)
 {
     PrimaryComponentTick.bCanEverTick = true;
 }
 
 UVKVoiceCommanderComponent::~UVKVoiceCommanderComponent() = default;
+
+void UVKVoiceCommanderComponent::SetTrainingMode(bool const bEnable)
+{
+    mbIsTrainingMode = bEnable;
+    UE_LOG(LogTemp, Log, TEXT(">> [음성 모드 전환]: %s"), bEnable ? TEXT("훈련 모드 (새 액션 학습 가능)") : TEXT("사용 모드 (실전 명령)"));
+}
+
+bool UVKVoiceCommanderComponent::IsTrainingMode() const
+{
+    return mbIsTrainingMode;
+}
 
 UVKActionPoolComponent* UVKVoiceCommanderComponent::GetActionPool() const
 {
@@ -29,6 +45,11 @@ UVKActionPoolComponent* UVKVoiceCommanderComponent::GetActionPool() const
 UVKActiveActionComponent* UVKVoiceCommanderComponent::GetActiveAction() const
 {
     return mActiveAction;
+}
+
+FVKEmbeddingEncoderRunner* UVKVoiceCommanderComponent::GetEncoderRunner() const
+{
+    return mEncoderRunner.Get();
 }
 
 void UVKVoiceCommanderComponent::BeginPlay()
@@ -58,13 +79,20 @@ void UVKVoiceCommanderComponent::BeginPlay()
         mActiveAction->RegisterComponent();
     }
 
-    mQwenRunner = MakeUnique<FQwenOnDeviceRunner>();
-    FString const QwenModelPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/Qwen2.5_0.5b_onnx"));
-    Async(EAsyncExecution::Thread, [this, QwenModelPath]()
+    mEncoderRunner = MakeUnique<FVKEmbeddingEncoderRunner>();
+    FString const ModelPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/ko_sroberta_onnx"));
+    Async(EAsyncExecution::Thread, [this, ModelPath]()
     {
-        if (mQwenRunner)
+        if (mEncoderRunner)
         {
-            mQwenRunner->Initialize(QwenModelPath);
+            if (mEncoderRunner->Initialize(ModelPath))
+            {
+                if (mActionPool)
+                {
+                    mActionPool->CacheActionEmbeddings(mEncoderRunner.Get());
+                    UE_LOG(LogTemp, Log, TEXT(">> [온디바이스 인코더 모델 초기화 및 액션 임베딩 캐싱 완료]"));
+                }
+            }
         }
     });
 
@@ -75,10 +103,10 @@ void UVKVoiceCommanderComponent::EndPlay(EEndPlayReason::Type const EndPlayReaso
 {
     StopVoiceRecognition();
 
-    if (mQwenRunner)
+    if (mEncoderRunner)
     {
-        mQwenRunner->Shutdown();
-        mQwenRunner.Reset();
+        mEncoderRunner->Shutdown();
+        mEncoderRunner.Reset();
     }
 
     Super::EndPlay(EndPlayReason);
@@ -121,75 +149,43 @@ void UVKVoiceCommanderComponent::HandleSpeechRecognized(FString const& Recognize
         return;
     }
 
+    if (mbIsTrainingMode)
+    {
+        Async(EAsyncExecution::Thread, [this, RecognizedText]()
+        {
+            FBotMovementActionDef NewActionDef;
+            TArray<FString> TriggerPhrases;
+            if (FVKActionSpeechLearner::ParseActionFromSpeech(RecognizedText, NewActionDef, TriggerPhrases))
+            {
+                AsyncTask(ENamedThreads::GameThread, [this, NewActionDef, TriggerPhrases]()
+                {
+                    if (mActionPool)
+                    {
+                        mActionPool->RegisterCustomAction(NewActionDef, TriggerPhrases);
+                        mActionPool->CacheActionEmbeddings(mEncoderRunner.Get());
+                        UE_LOG(LogTemp, Log, TEXT(">> [음성 훈련 성공]: 액션 '%s' 등록! (속도: %.1f배, 시간: %.1f초, 무한지속: %d)"),
+                            *NewActionDef.mActionId.ToString(), NewActionDef.mSpeedMultiplier, NewActionDef.mDefaultDuration, NewActionDef.mbKeepUntilStop);
+                        OnActionTrained.Broadcast(NewActionDef.mActionId, NewActionDef.mSpeedMultiplier, NewActionDef.mDefaultDuration, NewActionDef.mbKeepUntilStop);
+                    }
+                });
+            }
+        });
+        return;
+    }
+
     Async(EAsyncExecution::Thread, [this, RecognizedText, VadDurationMs, SttDurationMs]()
     {
-        FName ActionId = FName(TEXT("Move"));
-        FVector Direction = FVector(1.0f, 0.0f, 0.0f);
-        int32 DeltaTicks = 0;
-        bool bHandledByLLM = false;
-
         double const InferStart = FPlatformTime::Seconds();
 
-        if (mQwenRunner && mQwenRunner->IsInitialized())
-        {
-            FString const Prompt = UVKActionSelector::BuildPrompt(RecognizedText, mActionPool);
-            FString const Response = mQwenRunner->GenerateText(Prompt, 10);
-            UE_LOG(LogTemp, Log, TEXT(">> [Qwen2.5 On-Device 응답]: %s"), *Response);
-
-            if (UVKActionSelector::ParseTokenResponse(Response, mActionPool, ActionId, Direction, DeltaTicks))
-            {
-                bHandledByLLM = true;
-            }
-        }
-
-        if (!bHandledByLLM)
-        {
-            if (RecognizedText.Contains(TEXT("정지")) || RecognizedText.Contains(TEXT("멈춰")) || RecognizedText.Contains(TEXT("스톱")) || RecognizedText.Contains(TEXT("stop")))
-            {
-                ActionId = FName(TEXT("Stop"));
-                Direction = FVector::ZeroVector;
-            }
-            else if (RecognizedText.Contains(TEXT("대시")) || RecognizedText.Contains(TEXT("돌진")) || RecognizedText.Contains(TEXT("뛰어")) || RecognizedText.Contains(TEXT("dash")))
-            {
-                ActionId = FName(TEXT("Dash"));
-            }
-            else if (RecognizedText.Contains(TEXT("회피")) || RecognizedText.Contains(TEXT("구르")) || RecognizedText.Contains(TEXT("evade")))
-            {
-                ActionId = FName(TEXT("Evade"));
-            }
-            else if (RecognizedText.Contains(TEXT("후퇴")) || RecognizedText.Contains(TEXT("물러서")) || RecognizedText.Contains(TEXT("빠져")))
-            {
-                ActionId = FName(TEXT("FallBack"));
-            }
-
-            if (ActionId != FName(TEXT("Stop")))
-            {
-                if (RecognizedText.Contains(TEXT("뒤")) || RecognizedText.Contains(TEXT("후진")))
-                {
-                    Direction = FVector(-1.0f, 0.0f, 0.0f);
-                }
-                else if (RecognizedText.Contains(TEXT("왼")) || RecognizedText.Contains(TEXT("좌")))
-                {
-                    Direction = FVector(0.0f, -1.0f, 0.0f);
-                }
-                else if (RecognizedText.Contains(TEXT("오른")) || RecognizedText.Contains(TEXT("우")))
-                {
-                    Direction = FVector(0.0f, 1.0f, 0.0f);
-                }
-            }
-
-            if (RecognizedText.Contains(TEXT("조금만")) || RecognizedText.Contains(TEXT("살짝만")))
-            {
-                DeltaTicks = 1;
-            }
-            else if (RecognizedText.Contains(TEXT("더")) || RecognizedText.Contains(TEXT("계속")))
-            {
-                DeltaTicks = 3;
-            }
-        }
+        FBotActionParseResult const ParseResult = UVKActionSelector::ClassifyVoiceCommand(
+            RecognizedText, mActionPool, mEncoderRunner.Get(), 0.35f);
 
         double const InferDurationMs = (FPlatformTime::Seconds() - InferStart) * 1000.0;
         double const DispatchStartTime = FPlatformTime::Seconds();
+
+        FName const ActionId = ParseResult.mActionId;
+        FVector const Direction = ParseResult.mDirection;
+        int32 const DeltaTicks = ParseResult.mDeltaTicks;
 
         AsyncTask(ENamedThreads::GameThread, [this, ActionId, Direction, DeltaTicks, RecognizedText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime]()
         {
@@ -216,38 +212,64 @@ void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
     double const ActionDispatchMs = (FPlatformTime::Seconds() - DispatchStartTime) * 1000.0;
     double const TotalLatencyFromSpeechEnd = SttDurationMs + InferDurationMs + ActionDispatchMs;
 
-    float ExecDuration = mMoveDuration;
+    float ActualSpeed = 1.0f;
+    float ActualDuration = mMoveDuration;
+    bool bKeepUntilStop = false;
+    bool bCriticalFail = false;
+
     if (mActionPool != nullptr)
     {
         if (DeltaTicks != 0)
         {
             float const UpdatedDuration = mActionPool->AdjustActionDuration(ActionId, DeltaTicks);
-            UE_LOG(LogTemp, Log, TEXT(">> [적응형 지속시간 학습]: 액션 %s, Tick 변화: %d (%.1f초), 갱신된 지속시간: %.2f초"),
-                *ActionId.ToString(), DeltaTicks, DeltaTicks * 0.1f, UpdatedDuration);
+            UE_LOG(LogTemp, Log, TEXT(">> [적응형 지속시간 조절]: 액션 %s, Tick: %+d, 지속시간: %.2f초"),
+                *ActionId.ToString(), DeltaTicks, UpdatedDuration);
         }
 
-        FBotMovementActionDef ActionDef;
-        if (mActionPool->GetAction(ActionId, ActionDef))
+        if (mActionPool->EvaluateActionPerformance(ActionId, ActualSpeed, ActualDuration, bKeepUntilStop, bCriticalFail))
         {
-            ExecDuration = ActionDef.mAdaptiveDuration;
-            mActiveAction->ApplyAction(ActionId, Direction, ActionDef.mSpeedMultiplier, ExecDuration);
+            if (bCriticalFail)
+            {
+                UE_LOG(LogTemp, Warning, TEXT(">> [로봇 주춤]: 액션 '%s' 숙련도 부족으로 동작을 수행하지 못했습니다!"), *ActionId.ToString());
+                OnActionExecutionImperfect.Broadcast(ActionId);
+                return;
+            }
         }
-        else
-        {
-            mActiveAction->ApplyAction(ActionId, Direction, 1.0f, ExecDuration);
-        }
+    }
+
+    if (ActionId == FName(TEXT("Stop")))
+    {
+        mbIsContinuousMoving = false;
+        mActiveAction->ApplyAction(ActionId, FVector::ZeroVector, 0.0f, 0.0f);
+    }
+    else if (bKeepUntilStop)
+    {
+        mbIsContinuousMoving = true;
+        mContinuousDirection = Direction;
+        mContinuousSpeedMultiplier = ActualSpeed;
+        mActiveAction->ApplyAction(ActionId, Direction, ActualSpeed, 0.0f);
     }
     else
     {
-        mActiveAction->ApplyAction(ActionId, Direction, 1.0f, ExecDuration);
+        mbIsContinuousMoving = false;
+        mActiveAction->ApplyAction(ActionId, Direction, ActualSpeed, ActualDuration);
+    }
+
+    if (mActionPool != nullptr && mEncoderRunner && mEncoderRunner->IsInitialized())
+    {
+        TArray<float> UtteranceEmbedding;
+        if (mEncoderRunner->GetSentenceEmbedding(RawText, UtteranceEmbedding))
+        {
+            mActionPool->RecordActionSuccess(ActionId, UtteranceEmbedding);
+        }
     }
 
     UE_LOG(LogTemp, Log, TEXT("========================================================================="));
     UE_LOG(LogTemp, Log, TEXT(">> [음성 파이프라인 지연 시간 프로파일링 리포트]"));
     UE_LOG(LogTemp, Log, TEXT(" - 1. VAD 음성 활동 감지   : %.1f ms"), VadDurationMs);
     UE_LOG(LogTemp, Log, TEXT(" - 2. STT 텍스트 디코딩    : %.1f ms (원문: '%s')"), SttDurationMs, *RawText);
-    UE_LOG(LogTemp, Log, TEXT(" - 3. Qwen2.5 온디바이스 추론 : %.1f ms (결과: %s, 시간: %.2f초, Ticks: %+d)"),
-        InferDurationMs, *ActionId.ToString(), ExecDuration, DeltaTicks);
+    UE_LOG(LogTemp, Log, TEXT(" - 3. 온디바이스 인코더 추론 : %.1f ms (결과: %s, 속도: %.1f배, 시간: %.2f초)"),
+        InferDurationMs, *ActionId.ToString(), ActualSpeed, ActualDuration);
     UE_LOG(LogTemp, Log, TEXT(" - 4. 액션 게임스레드 실행 : %.1f ms"), ActionDispatchMs);
     UE_LOG(LogTemp, Log, TEXT(" ★ [체감 반응 지연 (발화 종료 -> 캐릭터 반응)]: %.1f ms"), TotalLatencyFromSpeechEnd);
     UE_LOG(LogTemp, Log, TEXT("========================================================================="));
@@ -293,13 +315,21 @@ void UVKVoiceCommanderComponent::TickComponent(float DeltaTime, ELevelTick TickT
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!mOwnerCharacter.IsValid() || mActiveAction == nullptr || !mActiveAction->IsActionActive())
+    if (!mOwnerCharacter.IsValid())
     {
         return;
     }
 
-    FVector const CurrentDir = mActiveAction->GetCurrentDirection();
-    float const SpeedMult = mActiveAction->GetCurrentSpeedMultiplier();
+    if (mbIsContinuousMoving && !mContinuousDirection.IsNearlyZero())
+    {
+        mOwnerCharacter->DoMove(mContinuousDirection.Y * mContinuousSpeedMultiplier, mContinuousDirection.X * mContinuousSpeedMultiplier);
+        return;
+    }
 
-    mOwnerCharacter->DoMove(CurrentDir.Y * SpeedMult, CurrentDir.X * SpeedMult);
+    if (mActiveAction != nullptr && mActiveAction->IsActionActive())
+    {
+        FVector const CurrentDir = mActiveAction->GetCurrentDirection();
+        float const SpeedMult = mActiveAction->GetCurrentSpeedMultiplier();
+        mOwnerCharacter->DoMove(CurrentDir.Y * SpeedMult, CurrentDir.X * SpeedMult);
+    }
 }

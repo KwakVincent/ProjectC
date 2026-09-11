@@ -23,6 +23,7 @@ struct FBotActionParseResult
 };
 
 class UVKActionPoolComponent;
+class FVKEmbeddingEncoderRunner;
 
 UCLASS(BlueprintType)
 class BATTLEROBOT_API UVKActionSelector : public UObject
@@ -31,6 +32,18 @@ class BATTLEROBOT_API UVKActionSelector : public UObject
 
 public:
     UVKActionSelector();
+
+    static FBotActionParseResult ClassifyVoiceCommand(
+        FString const& RawVoiceText,
+        UVKActionPoolComponent const* ActionPool,
+        FVKEmbeddingEncoderRunner* EncoderRunner,
+        float const SimilarityThreshold = 0.40f);
+
+    UFUNCTION(BlueprintCallable, Category="VoiceAction")
+    static FVector ExtractDirectionFromText(FString const& Text, FName const& ActionId);
+
+    UFUNCTION(BlueprintCallable, Category="VoiceAction")
+    static int32 ExtractDeltaTicksFromText(FString const& Text);
 
     UFUNCTION(BlueprintCallable, Category="VoiceAction")
     static FString BuildPrompt(FString const& UserVoiceText, UVKActionPoolComponent const* ActionPool);
