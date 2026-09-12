@@ -15,11 +15,11 @@ class BATTLEROBOT_API FVoicePipeline
 public:
     static constexpr float VAD_THRESHOLD = 0.5f;
     static constexpr float RMS_THRESHOLD = 0.015f;
-    static constexpr int32_t SILENCE_CHUNKS_LIMIT = 7;
+    static constexpr int32_t DEFAULT_SILENCE_CHUNKS_LIMIT = 3;
 
     using FOnSpeechRecognized = TFunction<void(FString const&, double VadDurationMs, double SttDurationMs)>;
 
-    FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath);
+    FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath, int32_t InitialSilenceLimit = DEFAULT_SILENCE_CHUNKS_LIMIT);
     ~FVoicePipeline();
 
     bool StartCapture();
@@ -27,6 +27,10 @@ public:
 
     void ProcessAudioChunk(float const* ChunkData);
     void SetOnSpeechRecognized(FOnSpeechRecognized Callback);
+
+    void SetSilenceLimit(int32_t NewLimit);
+    int32_t GetSilenceLimit() const;
+    void OnActionEvaluationFeedback(int32_t ValidActionCount);
 
 protected:
     void ExecuteSTT(std::vector<float> const& AudioData, double VadDurationMs);
@@ -38,6 +42,7 @@ protected:
     whisper_context* mWhisperContext;
     bool mIsSpeaking;
     int32_t mSilenceChunkCount;
+    int32_t mSilenceChunksLimit;
     std::vector<float> mSpeechBuffer;
     std::vector<float> mAccumulatedInput;
     std::mutex mBufferMutex;

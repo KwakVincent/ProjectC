@@ -88,6 +88,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 
+	/** Cheat Code: 'GodMode' in console (~) unlocks 10 consecutive action levels */
+	UFUNCTION(Exec)
+	void GodMode();
+
 public:
 
 	/** Returns CameraBoom subobject **/

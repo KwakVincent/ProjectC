@@ -11,6 +11,8 @@
 
 UVKVoiceCommanderComponent::UVKVoiceCommanderComponent()
     : mMoveDuration(2.0f)
+    , mMaxConsecutiveActions(1)
+    , mSimilarityThreshold(0.65f)
     , mActionPool(nullptr)
     , mActiveAction(nullptr)
     , mEncoderRunner(nullptr)
@@ -26,6 +28,22 @@ UVKVoiceCommanderComponent::UVKVoiceCommanderComponent()
 
 UVKVoiceCommanderComponent::~UVKVoiceCommanderComponent() = default;
 
+void UVKVoiceCommanderComponent::SetSimilarityThreshold(float const NewThreshold)
+{
+    mSimilarityThreshold = FMath::Clamp(NewThreshold, 0.0f, 1.0f);
+    if (GConfig != nullptr)
+    {
+        GConfig->SetFloat(TEXT("VoiceProfile"), TEXT("SimilarityThreshold"), mSimilarityThreshold, GGameIni);
+        GConfig->Flush(false, GGameIni);
+    }
+    UE_LOG(LogTemp, Log, TEXT(">> [음성 유사도 임계치 설정]: %.2f (Game.ini 저장 완료)"), mSimilarityThreshold);
+}
+
+float UVKVoiceCommanderComponent::GetSimilarityThreshold() const
+{
+    return mSimilarityThreshold;
+}
+
 void UVKVoiceCommanderComponent::SetTrainingMode(bool const bEnable)
 {
     mbIsTrainingMode = bEnable;
@@ -40,6 +58,18 @@ bool UVKVoiceCommanderComponent::IsTrainingMode() const
 UVKActionPoolComponent* UVKVoiceCommanderComponent::GetActionPool() const
 {
     return mActionPool;
+}
+
+void UVKVoiceCommanderComponent::SetConsecutiveActionLevel(int32 const NewLevel)
+{
+    mMaxConsecutiveActions = FMath::Clamp(NewLevel, 1, 10);
+    UE_LOG(LogTemp, Log, TEXT(">> [연속 명령 단계 설정]: 현재 %d단계 해금 (최대 %d개 연속 액션 실행 가능)"),
+        mMaxConsecutiveActions, mMaxConsecutiveActions);
+}
+
+int32 UVKVoiceCommanderComponent::GetConsecutiveActionLevel() const
+{
+    return mMaxConsecutiveActions;
 }
 
 UVKActiveActionComponent* UVKVoiceCommanderComponent::GetActiveAction() const
@@ -119,10 +149,20 @@ void UVKVoiceCommanderComponent::StartVoiceRecognition()
         return;
     }
 
-    FString const VadPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/silero_vad.onnx"));
-    FString const WhisperPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/ggml-base.bin"));
+    int32 SavedSilenceLimit = FVoicePipeline::DEFAULT_SILENCE_CHUNKS_LIMIT;
+    if (GConfig != nullptr)
+    {
+        GConfig->GetInt(TEXT("VoiceProfile"), TEXT("UserSilenceLimit"), SavedSilenceLimit, GGameIni);
+        GConfig->GetFloat(TEXT("VoiceProfile"), TEXT("SimilarityThreshold"), mSimilarityThreshold, GGameIni);
+    }
 
-    mVoicePipeline = MakeUnique<FVoicePipeline>(VadPath, WhisperPath);
+    FString const VadPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/silero_vad.onnx"));
+    FString const WhisperPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/ggml-tiny.bin"));
+
+    mVoicePipeline = MakeUnique<FVoicePipeline>(VadPath, WhisperPath, SavedSilenceLimit);
+    UE_LOG(LogTemp, Log, TEXT(">> [음성 파이프라인 시작] 저장된 VAD 침묵 한계: %d 청크 (약 %d ms), 유사도 임계치: %.2f"),
+        SavedSilenceLimit, SavedSilenceLimit * 32, mSimilarityThreshold);
+
     mVoicePipeline->SetOnSpeechRecognized([this](FString const& Text, double VadMs, double SttMs)
     {
         HandleSpeechRecognized(Text, VadMs, SttMs);
@@ -177,21 +217,24 @@ void UVKVoiceCommanderComponent::HandleSpeechRecognized(FString const& Recognize
     {
         double const InferStart = FPlatformTime::Seconds();
 
-        FBotActionParseResult const ParseResult = UVKActionSelector::ClassifyVoiceCommand(
-            RecognizedText, mActionPool, mEncoderRunner.Get(), 0.35f);
+        int32 const AllowedActions = mMaxConsecutiveActions;
+        TArray<FBotActionParseResult> const ParseResults = UVKActionSelector::ClassifyVoiceCommandSequence(
+            RecognizedText, mActionPool, mEncoderRunner.Get(), AllowedActions, mSimilarityThreshold);
 
         double const InferDurationMs = (FPlatformTime::Seconds() - InferStart) * 1000.0;
         double const DispatchStartTime = FPlatformTime::Seconds();
 
-        FName const ActionId = ParseResult.mActionId;
-        FVector const Direction = ParseResult.mDirection;
-        int32 const DeltaTicks = ParseResult.mDeltaTicks;
-
-        AsyncTask(ENamedThreads::GameThread, [this, ActionId, Direction, DeltaTicks, RecognizedText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime]()
+        AsyncTask(ENamedThreads::GameThread, [this, ParseResults, RecognizedText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime]()
         {
-            ExecuteActionOnGameThread(ActionId, Direction, DeltaTicks, RecognizedText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime);
+            ExecuteActionSequenceOnGameThread(ParseResults, RecognizedText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime);
         });
     });
+}
+
+void UVKVoiceCommanderComponent::HandleCommandUnrecognized(FString const& RawText)
+{
+    UE_LOG(LogTemp, Warning, TEXT(">> [음성 명령 미인식(실패)]: '%s' (일치하는 액션을 찾을 수 없어 명령을 실행하지 않습니다. UI/피드백 브로드캐스트)"), *RawText);
+    OnVoiceCommandUnrecognized.Broadcast(RawText);
 }
 
 void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
@@ -297,6 +340,100 @@ void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
     }
 
     ExecuteCommandOnGameThread(LegacyCommand, RawText);
+}
+
+void UVKVoiceCommanderComponent::ExecuteActionSequenceOnGameThread(
+    TArray<FBotActionParseResult> const& ParseResults,
+    FString const& RawText,
+    double VadDurationMs,
+    double SttDurationMs,
+    double InferDurationMs,
+    double DispatchStartTime)
+{
+    if (!IsValid(this) || mActiveAction == nullptr)
+    {
+        return;
+    }
+
+    if (mVoicePipeline)
+    {
+        int32 const ValidCount = ParseResults.Num();
+        mVoicePipeline->OnActionEvaluationFeedback(ValidCount);
+
+        if (GConfig != nullptr && ValidCount >= 1)
+        {
+            int32 const UpdatedLimit = mVoicePipeline->GetSilenceLimit();
+            GConfig->SetInt(TEXT("VoiceProfile"), TEXT("UserSilenceLimit"), UpdatedLimit, GGameIni);
+            GConfig->Flush(false, GGameIni);
+        }
+    }
+
+    if (ParseResults.IsEmpty())
+    {
+        HandleCommandUnrecognized(RawText);
+        return;
+    }
+
+    if (ParseResults.Num() == 1)
+    {
+        FBotActionParseResult const& First = ParseResults[0];
+        ExecuteActionOnGameThread(
+            First.mActionId, First.mDirection, First.mDeltaTicks,
+            RawText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime);
+        return;
+    }
+
+    double const ActionDispatchMs = (FPlatformTime::Seconds() - DispatchStartTime) * 1000.0;
+    double const TotalLatencyFromSpeechEnd = SttDurationMs + InferDurationMs + ActionDispatchMs;
+
+    TArray<FBotActionCommand> ActionSequence;
+    for (FBotActionParseResult const& SubAction : ParseResults)
+    {
+        float ActualSpeed = 1.0f;
+        float ActualDuration = mMoveDuration;
+        bool bKeepUntilStop = false;
+        bool bCriticalFail = false;
+
+        if (mActionPool != nullptr)
+        {
+            if (SubAction.mDeltaTicks != 0)
+            {
+                mActionPool->AdjustActionDuration(SubAction.mActionId, SubAction.mDeltaTicks);
+            }
+
+            mActionPool->EvaluateActionPerformance(SubAction.mActionId, ActualSpeed, ActualDuration, bKeepUntilStop, bCriticalFail);
+        }
+
+        if (bCriticalFail)
+        {
+            UE_LOG(LogTemp, Warning, TEXT(">> [로봇 연속동작 중 주춤]: 액션 '%s' 숙련도 부족으로 건너뜁니다!"), *SubAction.mActionId.ToString());
+            continue;
+        }
+
+        FBotActionCommand Command;
+        Command.mActionId = SubAction.mActionId;
+        Command.mDirection = SubAction.mDirection;
+        Command.mSpeedMultiplier = ActualSpeed;
+        Command.mDuration = ActualDuration;
+
+        ActionSequence.Add(Command);
+    }
+
+    if (!ActionSequence.IsEmpty())
+    {
+        mbIsContinuousMoving = false;
+        mActiveAction->ClearQueue();
+        mActiveAction->EnqueueActionSequence(ActionSequence);
+
+        UE_LOG(LogTemp, Log, TEXT("========================================================================="));
+        UE_LOG(LogTemp, Log, TEXT(">> [연속 음성 파이프라인 (총 %d단 연속 액션 시퀀스)]"), ActionSequence.Num());
+        UE_LOG(LogTemp, Log, TEXT(" - 1. VAD 음성 활동 감지   : %.1f ms"), VadDurationMs);
+        UE_LOG(LogTemp, Log, TEXT(" - 2. STT 텍스트 디코딩    : %.1f ms (원문: '%s')"), SttDurationMs, *RawText);
+        UE_LOG(LogTemp, Log, TEXT(" - 3. 온디바이스 인코더 추론 : %.1f ms"), InferDurationMs);
+        UE_LOG(LogTemp, Log, TEXT(" - 4. 액션 시퀀스 큐잉 등록 : %.1f ms"), ActionDispatchMs);
+        UE_LOG(LogTemp, Log, TEXT(" ★ [체감 반응 지연]: %.1f ms"), TotalLatencyFromSpeechEnd);
+        UE_LOG(LogTemp, Log, TEXT("========================================================================="));
+    }
 }
 
 void UVKVoiceCommanderComponent::ExecuteCommandOnGameThread(EBotVoiceCommand Command, FString const& RawText)

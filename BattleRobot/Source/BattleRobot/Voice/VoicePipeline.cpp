@@ -21,11 +21,12 @@ static void MaDataCallback(ma_device* pDevice, void* pOutput, void const* pInput
     Pipeline->ProcessAudioChunk(nullptr);
 }
 
-FVoicePipeline::FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath)
+FVoicePipeline::FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath, int32_t InitialSilenceLimit)
     : mVAD(VadModelPath)
     , mWhisperContext(nullptr)
     , mIsSpeaking(false)
     , mSilenceChunkCount(0)
+    , mSilenceChunksLimit(FMath::Clamp(InitialSilenceLimit, 2, 10))
     , mSpeechStartTime(0.0)
     , mOnSpeechRecognized(nullptr)
     , mAudioContext(nullptr)
@@ -195,26 +196,67 @@ void FVoicePipeline::ProcessAudioChunk(float const* ChunkData)
         mSpeechBuffer.insert(mSpeechBuffer.end(), ChunkData, ChunkData + FSileroVAD::VAD_CHUNK_SIZE);
     }
 
-    if (mSilenceChunkCount >= SILENCE_CHUNKS_LIMIT)
+    if (mSilenceChunkCount >= mSilenceChunksLimit)
     {
         mIsSpeaking = false;
         mSilenceChunkCount = 0;
         double const VadDurationMs = (FPlatformTime::Seconds() - mSpeechStartTime) * 1000.0;
-        UE_LOG(LogTemp, Log, TEXT("[음성 종료 감지] VAD 감지 시간: %.1f ms, 디코딩 시작..."), VadDurationMs);
+        UE_LOG(LogTemp, Log, TEXT("[음성 종료 감지] VAD 감지 시간: %.1f ms (설정 한계: %d 청크), 디코딩 시작..."), VadDurationMs, mSilenceChunksLimit);
 
         std::vector<float> AudioToProcess;
         {
             std::lock_guard<std::mutex> Lock(mBufferMutex);
-            AudioToProcess = std::move(mSpeechBuffer);
-            mSpeechBuffer.clear();
+            size_t const MaxBufferSize = static_cast<size_t>(FSileroVAD::SAMPLE_RATE * 5.0f);
+            if (mSpeechBuffer.size() > MaxBufferSize)
+            {
+                mSpeechBuffer.erase(mSpeechBuffer.begin(), mSpeechBuffer.begin() + (mSpeechBuffer.size() - MaxBufferSize));
+            }
+
+            AudioToProcess = mSpeechBuffer;
         }
 
         mVAD.ResetState();
-        std::thread([this, Data = std::move(AudioToProcess), VadDurationMs]()
+        std::thread([this, Data = MoveTemp(AudioToProcess), VadDurationMs]()
         {
             ExecuteSTT(Data, VadDurationMs);
         }).detach();
     }
+}
+
+void FVoicePipeline::SetSilenceLimit(int32_t NewLimit)
+{
+    mSilenceChunksLimit = FMath::Clamp(NewLimit, 2, 10);
+}
+
+int32_t FVoicePipeline::GetSilenceLimit() const
+{
+    return mSilenceChunksLimit;
+}
+
+void FVoicePipeline::OnActionEvaluationFeedback(int32_t ValidActionCount)
+{
+    std::lock_guard<std::mutex> Lock(mBufferMutex);
+
+    if (ValidActionCount == 0)
+    {
+        mSilenceChunksLimit = FMath::Min(mSilenceChunksLimit + 1, 10);
+        UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 유효 액션 0개 (미완성 발화). 버퍼 유지 (현재 버퍼: %d 샘플), 침묵 한계 증가 -> %d 청크 (약 %d ms)"),
+            static_cast<int32>(mSpeechBuffer.size()), mSilenceChunksLimit, mSilenceChunksLimit * 32);
+        return;
+    }
+
+    mSpeechBuffer.clear();
+
+    if (ValidActionCount == 1)
+    {
+        UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 유효 액션 1개 (단일 최적 완성). 버퍼 비움, 최적 침묵 한계 유지 -> %d 청크 (약 %d ms)"),
+            mSilenceChunksLimit, mSilenceChunksLimit * 32);
+        return;
+    }
+
+    mSilenceChunksLimit = FMath::Max(mSilenceChunksLimit - 1, 2);
+    UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 유효 액션 %d개 검출 (다중 발화 뭉침/반응 지연). 버퍼 비움, 기민성 향상을 위해 침묵 한계 단축 -> %d 청크 (약 %d ms)"),
+        ValidActionCount, mSilenceChunksLimit, mSilenceChunksLimit * 32);
 }
 
 void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData, double VadDurationMs)
@@ -224,7 +266,7 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData, double VadD
         return;
     }
 
-    if (AudioData.size() < static_cast<size_t>(FSileroVAD::SAMPLE_RATE * 0.3f))
+    if (AudioData.size() < static_cast<size_t>(FSileroVAD::SAMPLE_RATE * 0.2f))
     {
         return;
     }
@@ -234,18 +276,21 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData, double VadD
 
     whisper_full_params Params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     unsigned int const HardwareThreads = std::thread::hardware_concurrency();
-    int const ThreadCount = HardwareThreads > 0 ? static_cast<int>(FMath::Clamp(HardwareThreads, 4u, 8u)) : 4;
+    int const ThreadCount = HardwareThreads > 0 ? static_cast<int>(FMath::Clamp(HardwareThreads, 6u, 8u)) : 6;
     Params.n_threads = ThreadCount;
     Params.language = "ko";
     Params.no_context = true;
     Params.single_segment = true;
     Params.no_timestamps = true;
-    Params.max_tokens = 48;
+    Params.max_tokens = 16;
+    Params.audio_ctx = 384;
     Params.temperature = 0.0f;
     Params.temperature_inc = 0.0f;
     Params.print_progress = false;
     Params.print_realtime = false;
     Params.print_timestamps = false;
+
+    whisper_reset_timings(mWhisperContext);
 
     if (whisper_full(mWhisperContext, Params, AudioData.data(), static_cast<int>(AudioData.size())) != 0)
     {
@@ -266,7 +311,13 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData, double VadD
 
     ResultText.TrimStartAndEndInline();
     double const SttDurationMs = (FPlatformTime::Seconds() - SttStart) * 1000.0;
-    UE_LOG(LogTemp, Log, TEXT(">> [Whisper STT 디코딩 완료 (소요시간: %.1f ms)]: %s"), SttDurationMs, *ResultText);
+    whisper_timings const* Timings = whisper_get_timings(mWhisperContext);
+    if (Timings != nullptr)
+    {
+        UE_LOG(LogTemp, Log, TEXT(">> [Whisper 세부 소요시간]: 인코더(Encode) = %.1f ms, 디코더(Decode) = %.1f ms"),
+            Timings->encode_ms, Timings->decode_ms);
+    }
+    UE_LOG(LogTemp, Log, TEXT(">> [Whisper STT 디코딩 완료 (총 소요시간: %.1f ms)]: %s"), SttDurationMs, *ResultText);
 
     if (mOnSpeechRecognized)
     {

@@ -40,6 +40,16 @@ public:
         float const SimilarityThreshold = 0.40f);
 
     UFUNCTION(BlueprintCallable, Category="VoiceAction")
+    static void SplitSequentialCommands(FString const& RawText, TArray<FString>& OutSubCommands);
+
+    static TArray<FBotActionParseResult> ClassifyVoiceCommandSequence(
+        FString const& RawVoiceText,
+        UVKActionPoolComponent const* ActionPool,
+        FVKEmbeddingEncoderRunner* EncoderRunner,
+        int32 const MaxAllowedActions,
+        float const SimilarityThreshold = 0.40f);
+
+    UFUNCTION(BlueprintCallable, Category="VoiceAction")
     static FVector ExtractDirectionFromText(FString const& Text, FName const& ActionId);
 
     UFUNCTION(BlueprintCallable, Category="VoiceAction")

@@ -134,3 +134,16 @@ void ABattleRobotCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+
+void ABattleRobotCharacter::GodMode()
+{
+	if (VoiceCommander != nullptr)
+	{
+		VoiceCommander->SetConsecutiveActionLevel(10);
+		if (GEngine != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("★ [치트 발동] GodMode 활성화! 연속 명령 10단계 최종 해금!"));
+		}
+		UE_LOG(LogTemp, Warning, TEXT("★ [치트 발동] GodMode 활성화! 연속 명령 10단계 최종 해금! (최대 10연속 액션 큐잉 가능)"));
+	}
+}

@@ -32,7 +32,8 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
         }
     }
 
-    if (ResolvedActionId.IsNone())
+    bool const bEnableKeywordFallback = false;
+    if (bEnableKeywordFallback && ResolvedActionId.IsNone())
     {
         if (TrimmedText.Contains(TEXT("정지")) || TrimmedText.Contains(TEXT("멈춰")) || TrimmedText.Contains(TEXT("스톱")) || TrimmedText.Contains(TEXT("stop")))
         {
@@ -50,10 +51,18 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
         {
             ResolvedActionId = FName(TEXT("FallBack"));
         }
-        else
+        else if (TrimmedText.Contains(TEXT("앞")) || TrimmedText.Contains(TEXT("뒤")) || TrimmedText.Contains(TEXT("왼")) || TrimmedText.Contains(TEXT("오른")) ||
+                 TrimmedText.Contains(TEXT("가")) || TrimmedText.Contains(TEXT("이동")) || TrimmedText.Contains(TEXT("전진")) || TrimmedText.Contains(TEXT("후진")) ||
+                 TrimmedText.Contains(TEXT("좌")) || TrimmedText.Contains(TEXT("우")))
         {
             ResolvedActionId = FName(TEXT("Move"));
         }
+    }
+
+    if (ResolvedActionId.IsNone())
+    {
+        Result.mbSuccess = false;
+        return Result;
     }
 
     Result.mActionId = ResolvedActionId;
@@ -62,6 +71,85 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
     Result.mbSuccess = true;
 
     return Result;
+}
+
+void UVKActionSelector::SplitSequentialCommands(FString const& RawText, TArray<FString>& OutSubCommands)
+{
+    OutSubCommands.Empty();
+    FString NormalizedText = RawText;
+    NormalizedText.TrimStartAndEndInline();
+    if (NormalizedText.IsEmpty())
+    {
+        return;
+    }
+
+    TArray<FString> const Separators = {
+        TEXT("갔다가"), TEXT("갓다가"), TEXT("했다가"), TEXT("햇다가"), TEXT("왔다가"), TEXT("왓다가"),
+        TEXT("돌았다가"), TEXT("돌앗다가"), TEXT("뛰었다가"), TEXT("뛰엇다가"), TEXT("멈췄다가"),
+        TEXT("한 다음에"), TEXT("한다음에"), TEXT("그 다음에"), TEXT("그다음에"), TEXT("다음으로"),
+        TEXT("한 뒤에"), TEXT("한뒤에"), TEXT("그 뒤에"), TEXT("그뒤에"),
+        TEXT("하고 나서"), TEXT("하고나서"), TEXT("한 후에"), TEXT("한후에"),
+        TEXT("그리고"), TEXT("그리구"),
+        TEXT("가고"), TEXT("돌고"), TEXT("뛰고"), TEXT("멈추고"),
+        TEXT(","), TEXT(".")
+    };
+
+    FString DelimiterReplaced = NormalizedText;
+    for (FString const& Sep : Separators)
+    {
+        DelimiterReplaced = DelimiterReplaced.Replace(*Sep, TEXT("|"));
+    }
+
+    TArray<FString> Tokens;
+    DelimiterReplaced.ParseIntoArray(Tokens, TEXT("|"), true);
+
+    for (FString& Token : Tokens)
+    {
+        Token.TrimStartAndEndInline();
+        if (!Token.IsEmpty())
+        {
+            OutSubCommands.Add(Token);
+        }
+    }
+
+    if (OutSubCommands.IsEmpty())
+    {
+        OutSubCommands.Add(NormalizedText);
+    }
+}
+
+TArray<FBotActionParseResult> UVKActionSelector::ClassifyVoiceCommandSequence(
+    FString const& RawVoiceText,
+    UVKActionPoolComponent const* ActionPool,
+    FVKEmbeddingEncoderRunner* EncoderRunner,
+    int32 const MaxAllowedActions,
+    float const SimilarityThreshold)
+{
+    TArray<FBotActionParseResult> Results;
+    TArray<FString> SubCommands;
+    SplitSequentialCommands(RawVoiceText, SubCommands);
+
+    int32 const ActionLimit = FMath::Clamp(MaxAllowedActions, 1, 10);
+    int32 ProcessCount = FMath::Min(SubCommands.Num(), ActionLimit);
+
+    for (int32 i = 0; i < ProcessCount; ++i)
+    {
+        FBotActionParseResult const SingleResult = ClassifyVoiceCommand(
+            SubCommands[i], ActionPool, EncoderRunner, SimilarityThreshold);
+
+        if (SingleResult.mbSuccess)
+        {
+            Results.Add(SingleResult);
+        }
+    }
+
+    if (SubCommands.Num() > ActionLimit)
+    {
+        UE_LOG(LogTemp, Warning, TEXT(">> [연속 명령 단계 제한]: 총 %d개 요청 중 현재 해금된 %d단계까지만 실행됩니다."),
+            SubCommands.Num(), ActionLimit);
+    }
+
+    return Results;
 }
 
 FVector UVKActionSelector::ExtractDirectionFromText(FString const& Text, FName const& ActionId)
