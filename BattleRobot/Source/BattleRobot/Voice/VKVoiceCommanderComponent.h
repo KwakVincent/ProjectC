@@ -60,6 +60,12 @@ public:
     float GetSimilarityThreshold() const;
 
     UFUNCTION(BlueprintCallable, Category="Voice")
+    void SetBufferRetentionTimeout(float const NewTimeoutSec);
+
+    UFUNCTION(BlueprintCallable, Category="Voice")
+    float GetBufferRetentionTimeout() const;
+
+    UFUNCTION(BlueprintCallable, Category="Voice")
     class UVKActiveActionComponent* GetActiveAction() const;
 
     FVKEmbeddingEncoderRunner* GetEncoderRunner() const;
@@ -109,6 +115,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Voice", meta=(ClampMin="0.0", ClampMax="1.0"))
     float mSimilarityThreshold;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Voice", meta=(ClampMin="0.1", ClampMax="3.0"))
+    float mBufferRetentionTimeout;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Voice")
     TObjectPtr<class UVKActionPoolComponent> mActionPool;

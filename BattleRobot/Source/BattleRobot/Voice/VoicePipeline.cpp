@@ -21,13 +21,16 @@ static void MaDataCallback(ma_device* pDevice, void* pOutput, void const* pInput
     Pipeline->ProcessAudioChunk(nullptr);
 }
 
-FVoicePipeline::FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath, int32_t InitialSilenceLimit)
+FVoicePipeline::FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath, int32_t InitialSilenceLimit, float InitialBufferTimeoutSec)
     : mVAD(VadModelPath)
     , mWhisperContext(nullptr)
     , mIsSpeaking(false)
     , mSilenceChunkCount(0)
     , mSilenceChunksLimit(FMath::Clamp(InitialSilenceLimit, 2, 10))
     , mSpeechStartTime(0.0)
+    , mLastSpeechEndTime(0.0)
+    , mBufferRetentionTimeoutSec(FMath::Clamp(InitialBufferTimeoutSec, 0.1f, 3.0f))
+    , mbHasPendingFailedBuffer(false)
     , mOnSpeechRecognized(nullptr)
     , mAudioContext(nullptr)
     , mAudioDevice(nullptr)
@@ -183,6 +186,24 @@ void FVoicePipeline::ProcessAudioChunk(float const* ChunkData)
         {
             mIsSpeaking = true;
             mSpeechStartTime = FPlatformTime::Seconds();
+
+            std::lock_guard<std::mutex> Lock(mBufferMutex);
+            if (mbHasPendingFailedBuffer)
+            {
+                double const ElapsedSinceLastSpeech = mSpeechStartTime - mLastSpeechEndTime;
+                if (ElapsedSinceLastSpeech > static_cast<double>(mBufferRetentionTimeoutSec))
+                {
+                    mSpeechBuffer.clear();
+                    UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 미완성 음성 보존 제한(%.2f초) 만료(경과: %.2f초) -> 이전 버퍼 폐기 및 리셋"),
+                        mBufferRetentionTimeoutSec, ElapsedSinceLastSpeech);
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 미완성 음성 보존 제한(%.2f초) 이내 연속 발화(경과: %.2f초) -> 이전 버퍼에 합산"),
+                        mBufferRetentionTimeoutSec, ElapsedSinceLastSpeech);
+                }
+                mbHasPendingFailedBuffer = false;
+            }
             UE_LOG(LogTemp, Log, TEXT("[음성 감지 시작] 말하는 중..."));
         }
         mSilenceChunkCount = 0;
@@ -207,7 +228,8 @@ void FVoicePipeline::ProcessAudioChunk(float const* ChunkData)
     {
         mIsSpeaking = false;
         mSilenceChunkCount = 0;
-        double const VadDurationMs = (FPlatformTime::Seconds() - mSpeechStartTime) * 1000.0;
+        mLastSpeechEndTime = FPlatformTime::Seconds();
+        double const VadDurationMs = (mLastSpeechEndTime - mSpeechStartTime) * 1000.0;
         UE_LOG(LogTemp, Log, TEXT("[음성 종료 감지] VAD 감지 시간: %.1f ms (설정 한계: %d 청크), 디코딩 시작..."), VadDurationMs, mSilenceChunksLimit);
 
         std::vector<float> AudioToProcess;
@@ -240,18 +262,31 @@ int32_t FVoicePipeline::GetSilenceLimit() const
     return mSilenceChunksLimit;
 }
 
+void FVoicePipeline::SetBufferRetentionTimeout(float NewTimeoutSec)
+{
+    mBufferRetentionTimeoutSec = FMath::Clamp(NewTimeoutSec, 0.1f, 3.0f);
+}
+
+float FVoicePipeline::GetBufferRetentionTimeout() const
+{
+    return mBufferRetentionTimeoutSec;
+}
+
 void FVoicePipeline::OnActionEvaluationFeedback(int32_t ValidActionCount)
 {
     std::lock_guard<std::mutex> Lock(mBufferMutex);
 
     if (ValidActionCount == 0)
     {
+        mbHasPendingFailedBuffer = true;
+        mLastSpeechEndTime = FPlatformTime::Seconds();
         mSilenceChunksLimit = FMath::Min(mSilenceChunksLimit + 1, 10);
-        UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 유효 액션 0개 (미완성 발화). 버퍼 유지 (현재 버퍼: %d 샘플), 침묵 한계 증가 -> %d 청크 (약 %d ms)"),
-            static_cast<int32>(mSpeechBuffer.size()), mSilenceChunksLimit, mSilenceChunksLimit * 32);
+        UE_LOG(LogTemp, Log, TEXT(">> [적응형 VAD] 유효 액션 0개 (미완성 발화). 버퍼 유지(보존 제한: %.2f초, 현재 버퍼: %d 샘플), 침묵 한계 증가 -> %d 청크 (약 %d ms)"),
+            mBufferRetentionTimeoutSec, static_cast<int32>(mSpeechBuffer.size()), mSilenceChunksLimit, mSilenceChunksLimit * 32);
         return;
     }
 
+    mbHasPendingFailedBuffer = false;
     mSpeechBuffer.clear();
 
     if (ValidActionCount == 1)

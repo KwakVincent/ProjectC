@@ -19,7 +19,7 @@ public:
 
     using FOnSpeechRecognized = TFunction<void(FString const&, double VadDurationMs, double SttDurationMs)>;
 
-    FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath, int32_t InitialSilenceLimit = DEFAULT_SILENCE_CHUNKS_LIMIT);
+    FVoicePipeline(FString const& VadModelPath, FString const& WhisperModelPath, int32_t InitialSilenceLimit = DEFAULT_SILENCE_CHUNKS_LIMIT, float InitialBufferTimeoutSec = 0.5f);
     ~FVoicePipeline();
 
     bool StartCapture();
@@ -31,19 +31,23 @@ public:
 
     void SetSilenceLimit(int32_t NewLimit);
     int32_t GetSilenceLimit() const;
+    void SetBufferRetentionTimeout(float NewTimeoutSec);
+    float GetBufferRetentionTimeout() const;
     void OnActionEvaluationFeedback(int32_t ValidActionCount);
 
 protected:
     void ExecuteSTT(std::vector<float> const& AudioData, double VadDurationMs);
     void OnAudioInput(float const* InputData, size_t FrameCount);
 
-    double mSpeechStartTime;
-
     FSileroVAD mVAD;
     whisper_context* mWhisperContext;
     bool mIsSpeaking;
     int32_t mSilenceChunkCount;
     int32_t mSilenceChunksLimit;
+    double mSpeechStartTime;
+    double mLastSpeechEndTime;
+    float mBufferRetentionTimeoutSec;
+    bool mbHasPendingFailedBuffer;
     std::vector<float> mSpeechBuffer;
     std::vector<float> mAccumulatedInput;
     std::mutex mBufferMutex;

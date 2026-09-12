@@ -13,6 +13,7 @@ UVKVoiceCommanderComponent::UVKVoiceCommanderComponent()
     : mMoveDuration(2.0f)
     , mMaxConsecutiveActions(1)
     , mSimilarityThreshold(0.65f)
+    , mBufferRetentionTimeout(0.5f)
     , mActionPool(nullptr)
     , mActiveAction(nullptr)
     , mEncoderRunner(nullptr)
@@ -42,6 +43,26 @@ void UVKVoiceCommanderComponent::SetSimilarityThreshold(float const NewThreshold
 float UVKVoiceCommanderComponent::GetSimilarityThreshold() const
 {
     return mSimilarityThreshold;
+}
+
+void UVKVoiceCommanderComponent::SetBufferRetentionTimeout(float const NewTimeoutSec)
+{
+    mBufferRetentionTimeout = FMath::Clamp(NewTimeoutSec, 0.1f, 3.0f);
+    if (mVoicePipeline)
+    {
+        mVoicePipeline->SetBufferRetentionTimeout(mBufferRetentionTimeout);
+    }
+    if (GConfig != nullptr)
+    {
+        GConfig->SetFloat(TEXT("VoiceProfile"), TEXT("BufferRetentionTimeout"), mBufferRetentionTimeout, GGameIni);
+        GConfig->Flush(false, GGameIni);
+    }
+    UE_LOG(LogTemp, Log, TEXT(">> [음성 버퍼 보존 유효시간 설정]: %.2f초 (Game.ini 저장 완료)"), mBufferRetentionTimeout);
+}
+
+float UVKVoiceCommanderComponent::GetBufferRetentionTimeout() const
+{
+    return mBufferRetentionTimeout;
 }
 
 void UVKVoiceCommanderComponent::SetTrainingMode(bool const bEnable)
@@ -154,14 +175,15 @@ void UVKVoiceCommanderComponent::StartVoiceRecognition()
     {
         GConfig->GetInt(TEXT("VoiceProfile"), TEXT("UserSilenceLimit"), SavedSilenceLimit, GGameIni);
         GConfig->GetFloat(TEXT("VoiceProfile"), TEXT("SimilarityThreshold"), mSimilarityThreshold, GGameIni);
+        GConfig->GetFloat(TEXT("VoiceProfile"), TEXT("BufferRetentionTimeout"), mBufferRetentionTimeout, GGameIni);
     }
 
     FString const VadPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/silero_vad.onnx"));
     FString const WhisperPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/ggml-tiny.bin"));
 
-    mVoicePipeline = MakeUnique<FVoicePipeline>(VadPath, WhisperPath, SavedSilenceLimit);
-    UE_LOG(LogTemp, Log, TEXT(">> [음성 파이프라인 시작] 저장된 VAD 침묵 한계: %d 청크 (약 %d ms), 유사도 임계치: %.2f"),
-        SavedSilenceLimit, SavedSilenceLimit * 32, mSimilarityThreshold);
+    mVoicePipeline = MakeUnique<FVoicePipeline>(VadPath, WhisperPath, SavedSilenceLimit, mBufferRetentionTimeout);
+    UE_LOG(LogTemp, Log, TEXT(">> [음성 파이프라인 시작] 저장된 VAD 침묵 한계: %d 청크 (약 %d ms), 유사도 임계치: %.2f, 버퍼 보존시간: %.2f초"),
+        SavedSilenceLimit, SavedSilenceLimit * 32, mSimilarityThreshold, mBufferRetentionTimeout);
 
     mVoicePipeline->SetOnSpeechRecognized([this](FString const& Text, double VadMs, double SttMs)
     {
