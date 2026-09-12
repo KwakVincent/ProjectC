@@ -33,6 +33,12 @@ public:
     void StopVoiceRecognition();
 
     UFUNCTION(BlueprintCallable, Category="Voice")
+    void RestartVoiceRecognition();
+
+    UFUNCTION(BlueprintCallable, Category="Voice")
+    bool IsMicrophoneCapturing() const;
+
+    UFUNCTION(BlueprintCallable, Category="Voice")
     void SetTrainingMode(bool const bEnable);
 
     UFUNCTION(BlueprintCallable, Category="Voice")
@@ -116,6 +122,7 @@ protected:
     TWeakObjectPtr<ABattleRobotCharacter> mOwnerCharacter;
     EBotVoiceCommand mActiveCommand;
     float mRemainingMoveTime;
+    float mMicrophoneRetryTimer = 0.0f;
 
     bool mbIsTrainingMode = false;
     bool mbIsContinuousMoving = false;

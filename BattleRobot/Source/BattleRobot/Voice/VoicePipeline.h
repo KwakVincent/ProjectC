@@ -24,6 +24,7 @@ public:
 
     bool StartCapture();
     void StopCapture();
+    bool IsCapturing() const;
 
     void ProcessAudioChunk(float const* ChunkData);
     void SetOnSpeechRecognized(FOnSpeechRecognized Callback);

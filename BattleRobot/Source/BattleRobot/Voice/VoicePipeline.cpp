@@ -75,6 +75,8 @@ bool FVoicePipeline::StartCapture()
         return true;
     }
 
+    StopCapture();
+
     mAudioContext = std::make_unique<ma_context>();
     if (ma_context_init(nullptr, 0, nullptr, mAudioContext.get()) != MA_SUCCESS)
     {
@@ -126,7 +128,7 @@ bool FVoicePipeline::StartCapture()
 
 void FVoicePipeline::StopCapture()
 {
-    if (!mIsCapturing)
+    if (!mIsCapturing && !mAudioDevice && !mAudioContext)
     {
         return;
     }
@@ -146,6 +148,11 @@ void FVoicePipeline::StopCapture()
 
     mIsCapturing = false;
     UE_LOG(LogTemp, Log, TEXT("마이크 음성 캡처 중지 완료"));
+}
+
+bool FVoicePipeline::IsCapturing() const
+{
+    return mIsCapturing;
 }
 
 void FVoicePipeline::SetOnSpeechRecognized(FOnSpeechRecognized Callback)

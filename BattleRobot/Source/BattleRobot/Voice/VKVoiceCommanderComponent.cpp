@@ -182,6 +182,21 @@ void UVKVoiceCommanderComponent::StopVoiceRecognition()
     mVoicePipeline.Reset();
 }
 
+void UVKVoiceCommanderComponent::RestartVoiceRecognition()
+{
+    StopVoiceRecognition();
+    StartVoiceRecognition();
+}
+
+bool UVKVoiceCommanderComponent::IsMicrophoneCapturing() const
+{
+    if (mVoicePipeline)
+    {
+        return mVoicePipeline->IsCapturing();
+    }
+    return false;
+}
+
 void UVKVoiceCommanderComponent::HandleSpeechRecognized(FString const& RecognizedText, double VadDurationMs, double SttDurationMs)
 {
     if (RecognizedText.IsEmpty())
@@ -451,6 +466,19 @@ void UVKVoiceCommanderComponent::ExecuteCommandOnGameThread(EBotVoiceCommand Com
 void UVKVoiceCommanderComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    if (mVoicePipeline && !mVoicePipeline->IsCapturing())
+    {
+        mMicrophoneRetryTimer += DeltaTime;
+        if (mMicrophoneRetryTimer >= 2.0f)
+        {
+            mMicrophoneRetryTimer = 0.0f;
+            if (mVoicePipeline->StartCapture())
+            {
+                UE_LOG(LogTemp, Log, TEXT(">> [마이크 자동 감지 및 연결 성공]: 음성 캡처가 활성화되었습니다!"));
+            }
+        }
+    }
 
     if (!mOwnerCharacter.IsValid())
     {
