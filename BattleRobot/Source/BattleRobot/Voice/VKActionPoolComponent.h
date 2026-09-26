@@ -52,19 +52,46 @@ struct FBotMovementActionDef
     float mTargetDuration = 1.0f;
 };
 
+USTRUCT(BlueprintType)
+struct FVoiceCommandMapping
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Command")
+	FName mCommandId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Command")
+	TArray<FString> mTriggerPhrases;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Command")
+	FName mTargetActionId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Command")
+	FVector mDirection = FVector(1.0f, 0.0f, 0.0f);
+};
+
 struct FActionPhraseEmbedding
 {
-    FString mPhrase;
-    TArray<float> mVector;
+	FString mPhrase;
+	TArray<float> mVector;
 };
 
 struct FActionAnchorEntry
 {
-    FName mActionId;
-    TArray<FActionPhraseEmbedding> mPhraseEmbeddings;
+	FName mActionId;
+	TArray<FActionPhraseEmbedding> mPhraseEmbeddings;
+};
+
+struct FCommandAnchorEntry
+{
+	FName mCommandId;
+	FName mTargetActionId;
+	FVector mDirection = FVector::ZeroVector;
+	TArray<FActionPhraseEmbedding> mPhraseEmbeddings;
 };
 
 class FVKEmbeddingEncoderRunner;
+class UVKActionDataAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActionPoolChanged, FName const&, ActionId);
 
@@ -120,7 +147,17 @@ public:
 
     void CacheActionEmbeddings(FVKEmbeddingEncoderRunner* EncoderRunner);
 
+    UFUNCTION(BlueprintCallable, Category="ActionPool")
+    void LoadFromDataAsset(UVKActionDataAsset const* DataAsset);
+
+    bool FindBestMatchingCommand(
+        TArray<float> const& QueryEmbedding, float const SimilarityThreshold,
+        FName& OutActionId, FVector& OutDirection, float& OutSimilarity) const;
+
     bool FindBestMatchingAction(TArray<float> const& QueryEmbedding, float const SimilarityThreshold, FName& OutActionId, float& OutSimilarity) const;
+
+    UFUNCTION(BlueprintCallable, Category="ActionPool")
+    TArray<FVoiceCommandMapping> const& GetCommandMappings() const;
 
     UFUNCTION(BlueprintCallable, Category="ActionPool")
     bool EvaluateActionPerformance(FName const& ActionId, float& OutSpeed, float& OutDuration, bool& bOutKeepUntilStop, bool& bOutCriticalFail) const;
@@ -139,7 +176,14 @@ protected:
     void InitializeDefaultActions();
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="ActionPool")
+    TObjectPtr<UVKActionDataAsset> mActionDataAsset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="ActionPool")
     TMap<FName, FBotMovementActionDef> mActionMap;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="ActionPool")
+    TArray<FVoiceCommandMapping> mCommandMappings;
+
     TMap<FName, FActionAnchorEntry> mAnchorCache;
+    TMap<FName, FCommandAnchorEntry> mCommandAnchorCache;
 };

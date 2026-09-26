@@ -321,6 +321,8 @@ void FVoicePipeline::ExecuteSTT(std::vector<float> const& AudioData, double VadD
     int const ThreadCount = HardwareThreads > 0 ? static_cast<int>(FMath::Clamp(HardwareThreads, 6u, 8u)) : 6;
     Params.n_threads = ThreadCount;
     Params.language = "ko";
+    FTCHARToUTF8 const PromptUtf8(TEXT("앞으로, 뒤로, 왼쪽, 오른쪽, 멈춰, 정지, 스톱, stop, 그만, 서, 대시, dash, 회피, evade, 접근, approach"));
+    Params.initial_prompt = PromptUtf8.Get();
     Params.no_context = true;
     Params.single_segment = true;
     Params.no_timestamps = true;

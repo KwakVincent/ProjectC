@@ -98,14 +98,8 @@ protected:
     void HandleActionFinished(FName const& ActionId);
     void ExecuteCommandOnGameThread(EBotVoiceCommand Command, FString const& RawText);
     void ExecuteActionOnGameThread(
-        FName const& ActionId,
-        FVector const& Direction,
-        int32 DeltaTicks,
-        FString const& RawText,
-        double VadDurationMs,
-        double SttDurationMs,
-        double InferDurationMs,
-        double DispatchStartTime);
+        FName const& ActionId, FVector const& Direction, int32 DeltaTicks, float const Similarity, float const Threshold,
+        FString const& RawText, double VadDurationMs, double SttDurationMs, double InferDurationMs, double DispatchStartTime);
 
     void ExecuteActionSequenceOnGameThread(
         TArray<FBotActionParseResult> const& ParseResults,

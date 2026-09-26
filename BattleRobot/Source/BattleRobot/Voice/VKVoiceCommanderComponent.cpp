@@ -286,7 +286,7 @@ void UVKVoiceCommanderComponent::HandleSpeechRecognized(FString const& Recognize
 
 void UVKVoiceCommanderComponent::HandleCommandUnrecognized(FString const& RawText)
 {
-    UE_LOG(LogTemp, Warning, TEXT(">> [음성 명령 미인식(실패)]: '%s' (일치하는 액션을 찾을 수 없어 명령을 실행하지 않습니다. UI/피드백 브로드캐스트)"), *RawText);
+    UE_LOG(LogTemp, Warning, TEXT(">> [음성 명령 미인식(실패)]: '%s' (임계치: %.2f, 일치하는 액션을 찾을 수 없어 명령을 실행하지 않습니다. UI/피드백 브로드캐스트)"), *RawText, mSimilarityThreshold);
     OnVoiceCommandUnrecognized.Broadcast(RawText);
 }
 
@@ -299,14 +299,8 @@ void UVKVoiceCommanderComponent::HandleActionFinished(FName const& ActionId)
 }
 
 void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
-    FName const& ActionId,
-    FVector const& Direction,
-    int32 DeltaTicks,
-    FString const& RawText,
-    double VadDurationMs,
-    double SttDurationMs,
-    double InferDurationMs,
-    double DispatchStartTime)
+    FName const& ActionId, FVector const& Direction, int32 DeltaTicks, float const Similarity, float const Threshold,
+    FString const& RawText, double VadDurationMs, double SttDurationMs, double InferDurationMs, double DispatchStartTime)
 {
     if (!IsValid(this) || mActiveAction == nullptr)
     {
@@ -403,8 +397,8 @@ void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
     UE_LOG(LogTemp, Log, TEXT(">> [음성 파이프라인 지연 시간 프로파일링 리포트]"));
     UE_LOG(LogTemp, Log, TEXT(" - 1. VAD 음성 활동 감지   : %.1f ms"), VadDurationMs);
     UE_LOG(LogTemp, Log, TEXT(" - 2. STT 텍스트 디코딩    : %.1f ms (원문: '%s')"), SttDurationMs, *RawText);
-    UE_LOG(LogTemp, Log, TEXT(" - 3. 온디바이스 인코더 추론 : %.1f ms (결과: %s, 속도: %.1f배, 시간: %.2f초)"),
-        InferDurationMs, *ActionId.ToString(), ActualSpeed, ActualDuration);
+    UE_LOG(LogTemp, Log, TEXT(" - 3. 온디바이스 인코더 추론 : %.1f ms (결과: %s, 유사도: %.2f / 임계치: %.2f, 속도: %.1f배, 시간: %.2f초)"),
+        InferDurationMs, *ActionId.ToString(), Similarity, Threshold, ActualSpeed, ActualDuration);
     UE_LOG(LogTemp, Log, TEXT(" - 4. 액션 게임스레드 실행 : %.1f ms"), ActionDispatchMs);
     UE_LOG(LogTemp, Log, TEXT(" ★ [체감 반응 지연 (발화 종료 -> 캐릭터 반응)]: %.1f ms"), TotalLatencyFromSpeechEnd);
     UE_LOG(LogTemp, Log, TEXT("========================================================================="));
@@ -470,7 +464,7 @@ void UVKVoiceCommanderComponent::ExecuteActionSequenceOnGameThread(
     {
         FBotActionParseResult const& First = ParseResults[0];
         ExecuteActionOnGameThread(
-            First.mActionId, First.mDirection, First.mDeltaTicks,
+            First.mActionId, First.mDirection, First.mDeltaTicks, First.mSimilarity, First.mThreshold,
             RawText, VadDurationMs, SttDurationMs, InferDurationMs, DispatchStartTime);
         return;
     }
@@ -521,7 +515,12 @@ void UVKVoiceCommanderComponent::ExecuteActionSequenceOnGameThread(
         UE_LOG(LogTemp, Log, TEXT(">> [연속 음성 파이프라인 (총 %d단 연속 액션 시퀀스)]"), ActionSequence.Num());
         UE_LOG(LogTemp, Log, TEXT(" - 1. VAD 음성 활동 감지   : %.1f ms"), VadDurationMs);
         UE_LOG(LogTemp, Log, TEXT(" - 2. STT 텍스트 디코딩    : %.1f ms (원문: '%s')"), SttDurationMs, *RawText);
-        UE_LOG(LogTemp, Log, TEXT(" - 3. 온디바이스 인코더 추론 : %.1f ms"), InferDurationMs);
+        UE_LOG(LogTemp, Log, TEXT(" - 3. 온디바이스 인코더 추론 : %.1f ms (임계치: %.2f)"), InferDurationMs, mSimilarityThreshold);
+        for (int32 i = 0; i < ParseResults.Num(); ++i)
+        {
+            UE_LOG(LogTemp, Log, TEXT("     └ [%d] 액션: %s (유사도: %.2f)"),
+                i + 1, *ParseResults[i].mActionId.ToString(), ParseResults[i].mSimilarity);
+        }
         UE_LOG(LogTemp, Log, TEXT(" - 4. 액션 시퀀스 큐잉 등록 : %.1f ms"), ActionDispatchMs);
         UE_LOG(LogTemp, Log, TEXT(" ★ [체감 반응 지연]: %.1f ms"), TotalLatencyFromSpeechEnd);
         UE_LOG(LogTemp, Log, TEXT("========================================================================="));

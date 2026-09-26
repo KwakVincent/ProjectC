@@ -19,6 +19,12 @@ struct FBotActionParseResult
     int32 mDeltaTicks = 0;
 
     UPROPERTY(BlueprintReadOnly, Category="VoiceAction")
+    float mSimilarity = 0.0f;
+
+    UPROPERTY(BlueprintReadOnly, Category="VoiceAction")
+    float mThreshold = 0.0f;
+
+    UPROPERTY(BlueprintReadOnly, Category="VoiceAction")
     bool mbSuccess = false;
 };
 

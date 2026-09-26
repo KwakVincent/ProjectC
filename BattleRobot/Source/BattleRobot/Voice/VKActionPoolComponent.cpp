@@ -1,5 +1,6 @@
 #include "VKActionPoolComponent.h"
 #include "VKEmbeddingEncoderRunner.h"
+#include "VKActionDataAsset.h"
 
 UVKActionPoolComponent::UVKActionPoolComponent()
 {
@@ -10,10 +11,32 @@ void UVKActionPoolComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (mActionMap.IsEmpty())
+    if (mActionDataAsset != nullptr)
+    {
+        LoadFromDataAsset(mActionDataAsset);
+    }
+    else if (mActionMap.IsEmpty())
     {
         InitializeDefaultActions();
     }
+}
+
+void UVKActionPoolComponent::LoadFromDataAsset(UVKActionDataAsset const* DataAsset)
+{
+    if (DataAsset == nullptr)
+    {
+        return;
+    }
+
+    mActionMap.Empty();
+    mCommandMappings.Empty();
+
+    for (FBotMovementActionDef const& ActionDef : DataAsset->GetActions())
+    {
+        RegisterAction(ActionDef);
+    }
+
+    mCommandMappings = DataAsset->GetCommandMappings();
 }
 
 void UVKActionPoolComponent::InitializeDefaultActions()
@@ -29,6 +52,7 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     MoveDef.mAdaptiveDuration = 1.0f;
     MoveDef.mbIsUnlocked = true;
     MoveDef.mbCanTurn = true;
+    MoveDef.mbKeepUntilStop = true;
     MoveDef.mTriggerPhrases = { TEXT("앞으로 가"), TEXT("전진해"), TEXT("직진"), TEXT("가자"), TEXT("forward"), TEXT("go") };
     RegisterAction(MoveDef);
 
@@ -89,8 +113,73 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     StopDef.mAdaptiveDuration = 0.0f;
     StopDef.mbIsUnlocked = true;
     StopDef.mbCanTurn = false;
-    StopDef.mTriggerPhrases = { TEXT("정지"), TEXT("멈춰"), TEXT("스톱"), TEXT("그만"), TEXT("서"), TEXT("stop") };
+    StopDef.mTriggerPhrases = { TEXT("정지"), TEXT("멈춰"), TEXT("스톱"), TEXT("그만"), TEXT("서"), TEXT("stop"), TEXT("멍쳐"), TEXT("멍차") };
     RegisterAction(StopDef);
+
+    mCommandMappings.Empty();
+
+    FVoiceCommandMapping MoveForward;
+    MoveForward.mCommandId = FName(TEXT("MoveForward"));
+    MoveForward.mTargetActionId = FName(TEXT("Move"));
+    MoveForward.mDirection = FVector(1.0f, 0.0f, 0.0f);
+    MoveForward.mTriggerPhrases = { TEXT("앞으로 가"), TEXT("전진해"), TEXT("직진"), TEXT("가자"), TEXT("앞으로"), TEXT("forward"), TEXT("go") };
+    mCommandMappings.Add(MoveForward);
+
+    FVoiceCommandMapping MoveBackward;
+    MoveBackward.mCommandId = FName(TEXT("MoveBackward"));
+    MoveBackward.mTargetActionId = FName(TEXT("Move"));
+    MoveBackward.mDirection = FVector(-1.0f, 0.0f, 0.0f);
+    MoveBackward.mTriggerPhrases = { TEXT("뒤로"), TEXT("뒤로 가"), TEXT("후진"), TEXT("후진해"), TEXT("back"), TEXT("backward") };
+    mCommandMappings.Add(MoveBackward);
+
+    FVoiceCommandMapping MoveLeft;
+    MoveLeft.mCommandId = FName(TEXT("MoveLeft"));
+    MoveLeft.mTargetActionId = FName(TEXT("Move"));
+    MoveLeft.mDirection = FVector(0.0f, -1.0f, 0.0f);
+    MoveLeft.mTriggerPhrases = { TEXT("왼쪽"), TEXT("좌측"), TEXT("왼쪽으로"), TEXT("왼쪽으로 가"), TEXT("left") };
+    mCommandMappings.Add(MoveLeft);
+
+    FVoiceCommandMapping MoveRight;
+    MoveRight.mCommandId = FName(TEXT("MoveRight"));
+    MoveRight.mTargetActionId = FName(TEXT("Move"));
+    MoveRight.mDirection = FVector(0.0f, 1.0f, 0.0f);
+    MoveRight.mTriggerPhrases = { TEXT("오른쪽"), TEXT("우측"), TEXT("오른쪽으로"), TEXT("오른쪽으로 가"), TEXT("right") };
+    mCommandMappings.Add(MoveRight);
+
+    FVoiceCommandMapping DashForward;
+    DashForward.mCommandId = FName(TEXT("DashForward"));
+    DashForward.mTargetActionId = FName(TEXT("Dash"));
+    DashForward.mDirection = FVector(1.0f, 0.0f, 0.0f);
+    DashForward.mTriggerPhrases = { TEXT("대시해"), TEXT("돌진해"), TEXT("앞으로 뛰어"), TEXT("달려"), TEXT("dash") };
+    mCommandMappings.Add(DashForward);
+
+    FVoiceCommandMapping EvadeCmd;
+    EvadeCmd.mCommandId = FName(TEXT("EvadeCmd"));
+    EvadeCmd.mTargetActionId = FName(TEXT("Evade"));
+    EvadeCmd.mDirection = FVector(1.0f, 0.0f, 0.0f);
+    EvadeCmd.mTriggerPhrases = { TEXT("긴급 회피"), TEXT("구르기"), TEXT("피해"), TEXT("닷지"), TEXT("evade") };
+    mCommandMappings.Add(EvadeCmd);
+
+    FVoiceCommandMapping FallBackCmd;
+    FallBackCmd.mCommandId = FName(TEXT("FallBackCmd"));
+    FallBackCmd.mTargetActionId = FName(TEXT("FallBack"));
+    FallBackCmd.mDirection = FVector(-1.0f, 0.0f, 0.0f);
+    FallBackCmd.mTriggerPhrases = { TEXT("후퇴해"), TEXT("물러서"), TEXT("거리 벌려"), TEXT("빠져"), TEXT("back off") };
+    mCommandMappings.Add(FallBackCmd);
+
+    FVoiceCommandMapping ApproachCmd;
+    ApproachCmd.mCommandId = FName(TEXT("ApproachCmd"));
+    ApproachCmd.mTargetActionId = FName(TEXT("ApproachEnemy"));
+    ApproachCmd.mDirection = FVector(1.0f, 0.0f, 0.0f);
+    ApproachCmd.mTriggerPhrases = { TEXT("적에게 접근해"), TEXT("적에게 다가가"), TEXT("적에게 가"), TEXT("접근해"), TEXT("다가가"), TEXT("approach") };
+    mCommandMappings.Add(ApproachCmd);
+
+    FVoiceCommandMapping StopCmd;
+    StopCmd.mCommandId = FName(TEXT("StopCmd"));
+    StopCmd.mTargetActionId = FName(TEXT("Stop"));
+    StopCmd.mDirection = FVector::ZeroVector;
+    StopCmd.mTriggerPhrases = { TEXT("정지"), TEXT("멈춰"), TEXT("스톱"), TEXT("그만"), TEXT("서"), TEXT("stop"), TEXT("멍쳐"), TEXT("멍차") };
+    mCommandMappings.Add(StopCmd);
 }
 
 void UVKActionPoolComponent::ResetToDefaultActions()
@@ -338,18 +427,41 @@ void UVKActionPoolComponent::CacheActionEmbeddings(FVKEmbeddingEncoderRunner* En
 
         mAnchorCache.Add(ActionId, MoveTemp(AnchorEntry));
     }
+
+    mCommandAnchorCache.Empty();
+
+    for (FVoiceCommandMapping const& Mapping : mCommandMappings)
+    {
+        FCommandAnchorEntry CmdAnchor;
+        CmdAnchor.mCommandId = Mapping.mCommandId;
+        CmdAnchor.mTargetActionId = Mapping.mTargetActionId;
+        CmdAnchor.mDirection = Mapping.mDirection;
+
+        for (FString const& Phrase : Mapping.mTriggerPhrases)
+        {
+            TArray<float> Embedding;
+            if (EncoderRunner->GetSentenceEmbedding(Phrase, Embedding))
+            {
+                FActionPhraseEmbedding PhraseEmbed;
+                PhraseEmbed.mPhrase = Phrase;
+                PhraseEmbed.mVector = MoveTemp(Embedding);
+                CmdAnchor.mPhraseEmbeddings.Add(MoveTemp(PhraseEmbed));
+            }
+        }
+
+        mCommandAnchorCache.Add(Mapping.mCommandId, MoveTemp(CmdAnchor));
+    }
 }
 
-bool UVKActionPoolComponent::FindBestMatchingAction(
-    TArray<float> const& QueryEmbedding,
-    float const SimilarityThreshold,
-    FName& OutActionId,
-    float& OutSimilarity) const
+bool UVKActionPoolComponent::FindBestMatchingCommand(
+    TArray<float> const& QueryEmbedding, float const SimilarityThreshold,
+    FName& OutActionId, FVector& OutDirection, float& OutSimilarity) const
 {
     OutActionId = NAME_None;
+    OutDirection = FVector(1.0f, 0.0f, 0.0f);
     OutSimilarity = -1.0f;
 
-    if (QueryEmbedding.IsEmpty() || mAnchorCache.IsEmpty())
+    if (QueryEmbedding.IsEmpty())
     {
         return false;
     }
@@ -357,45 +469,95 @@ bool UVKActionPoolComponent::FindBestMatchingAction(
     int32 const Dim = QueryEmbedding.Num();
     float BestSimilarity = -1.0f;
     FName BestAction = NAME_None;
+    FVector BestDirection = FVector(1.0f, 0.0f, 0.0f);
 
-    for (TPair<FName, FActionAnchorEntry> const& AnchorPair : mAnchorCache)
+    if (!mCommandAnchorCache.IsEmpty())
     {
-        FName const ActionId = AnchorPair.Key;
-        if (!IsActionUnlocked(ActionId))
+        for (TPair<FName, FCommandAnchorEntry> const& Pair : mCommandAnchorCache)
         {
-            continue;
-        }
-
-        FActionAnchorEntry const& Anchor = AnchorPair.Value;
-        for (FActionPhraseEmbedding const& PhraseEmbed : Anchor.mPhraseEmbeddings)
-        {
-            if (PhraseEmbed.mVector.Num() != Dim)
+            FCommandAnchorEntry const& Anchor = Pair.Value;
+            if (!IsActionUnlocked(Anchor.mTargetActionId))
             {
                 continue;
             }
 
-            float DotProduct = 0.0f;
-            for (int32 i = 0; i < Dim; ++i)
+            for (FActionPhraseEmbedding const& PhraseEmbed : Anchor.mPhraseEmbeddings)
             {
-                DotProduct += QueryEmbedding[i] * PhraseEmbed.mVector[i];
+                if (PhraseEmbed.mVector.Num() != Dim)
+                {
+                    continue;
+                }
+
+                float DotProduct = 0.0f;
+                for (int32 i = 0; i < Dim; ++i)
+                {
+                    DotProduct += QueryEmbedding[i] * PhraseEmbed.mVector[i];
+                }
+
+                if (DotProduct > BestSimilarity)
+                {
+                    BestSimilarity = DotProduct;
+                    BestAction = Anchor.mTargetActionId;
+                    BestDirection = Anchor.mDirection;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (TPair<FName, FActionAnchorEntry> const& AnchorPair : mAnchorCache)
+        {
+            FName const ActionId = AnchorPair.Key;
+            if (!IsActionUnlocked(ActionId))
+            {
+                continue;
             }
 
-            if (DotProduct > BestSimilarity)
+            FActionAnchorEntry const& Anchor = AnchorPair.Value;
+            for (FActionPhraseEmbedding const& PhraseEmbed : Anchor.mPhraseEmbeddings)
             {
-                BestSimilarity = DotProduct;
-                BestAction = ActionId;
+                if (PhraseEmbed.mVector.Num() != Dim)
+                {
+                    continue;
+                }
+
+                float DotProduct = 0.0f;
+                for (int32 i = 0; i < Dim; ++i)
+                {
+                    DotProduct += QueryEmbedding[i] * PhraseEmbed.mVector[i];
+                }
+
+                if (DotProduct > BestSimilarity)
+                {
+                    BestSimilarity = DotProduct;
+                    BestAction = ActionId;
+                }
             }
         }
     }
 
+    OutSimilarity = BestSimilarity;
     if (BestAction.IsNone() || BestSimilarity < SimilarityThreshold)
     {
         return false;
     }
 
     OutActionId = BestAction;
-    OutSimilarity = BestSimilarity;
+    OutDirection = BestDirection;
     return true;
+}
+
+bool UVKActionPoolComponent::FindBestMatchingAction(
+    TArray<float> const& QueryEmbedding, float const SimilarityThreshold,
+    FName& OutActionId, float& OutSimilarity) const
+{
+    FVector UnusedDirection;
+    return FindBestMatchingCommand(QueryEmbedding, SimilarityThreshold, OutActionId, UnusedDirection, OutSimilarity);
+}
+
+TArray<FVoiceCommandMapping> const& UVKActionPoolComponent::GetCommandMappings() const
+{
+    return mCommandMappings;
 }
 
 bool UVKActionPoolComponent::EvaluateActionPerformance(

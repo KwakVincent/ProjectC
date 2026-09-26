@@ -21,6 +21,7 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
     }
 
     FName ResolvedActionId = NAME_None;
+    FVector ResolvedDirection = FVector(1.0f, 0.0f, 0.0f);
     float ResolvedSimilarity = -1.0f;
 
     if (EncoderRunner != nullptr && EncoderRunner->IsInitialized() && ActionPool != nullptr)
@@ -28,7 +29,7 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
         TArray<float> QueryEmbedding;
         if (EncoderRunner->GetSentenceEmbedding(TrimmedText, QueryEmbedding))
         {
-            ActionPool->FindBestMatchingAction(QueryEmbedding, SimilarityThreshold, ResolvedActionId, ResolvedSimilarity);
+            ActionPool->FindBestMatchingCommand(QueryEmbedding, SimilarityThreshold, ResolvedActionId, ResolvedDirection, ResolvedSimilarity);
         }
     }
 
@@ -38,26 +39,34 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
         if (TrimmedText.Contains(TEXT("정지")) || TrimmedText.Contains(TEXT("멈춰")) || TrimmedText.Contains(TEXT("스톱")) || TrimmedText.Contains(TEXT("stop")))
         {
             ResolvedActionId = FName(TEXT("Stop"));
+            ResolvedDirection = FVector::ZeroVector;
         }
         else if (TrimmedText.Contains(TEXT("대시")) || TrimmedText.Contains(TEXT("돌진")) || TrimmedText.Contains(TEXT("뛰어")) || TrimmedText.Contains(TEXT("dash")))
         {
             ResolvedActionId = FName(TEXT("Dash"));
+            ResolvedDirection = FVector(1.0f, 0.0f, 0.0f);
         }
         else if (TrimmedText.Contains(TEXT("회피")) || TrimmedText.Contains(TEXT("구르")) || TrimmedText.Contains(TEXT("evade")))
         {
             ResolvedActionId = FName(TEXT("Evade"));
+            ResolvedDirection = FVector(1.0f, 0.0f, 0.0f);
         }
         else if (TrimmedText.Contains(TEXT("후퇴")) || TrimmedText.Contains(TEXT("물러서")) || TrimmedText.Contains(TEXT("빠져")))
         {
             ResolvedActionId = FName(TEXT("FallBack"));
+            ResolvedDirection = FVector(-1.0f, 0.0f, 0.0f);
         }
         else if (TrimmedText.Contains(TEXT("앞")) || TrimmedText.Contains(TEXT("뒤")) || TrimmedText.Contains(TEXT("왼")) || TrimmedText.Contains(TEXT("오른")) ||
                  TrimmedText.Contains(TEXT("가")) || TrimmedText.Contains(TEXT("이동")) || TrimmedText.Contains(TEXT("전진")) || TrimmedText.Contains(TEXT("후진")) ||
                  TrimmedText.Contains(TEXT("좌")) || TrimmedText.Contains(TEXT("우")))
         {
             ResolvedActionId = FName(TEXT("Move"));
+            ResolvedDirection = ExtractDirectionFromText(TrimmedText, ResolvedActionId);
         }
     }
+
+    Result.mSimilarity = ResolvedSimilarity;
+    Result.mThreshold = SimilarityThreshold;
 
     if (ResolvedActionId.IsNone())
     {
@@ -66,7 +75,7 @@ FBotActionParseResult UVKActionSelector::ClassifyVoiceCommand(
     }
 
     Result.mActionId = ResolvedActionId;
-    Result.mDirection = ExtractDirectionFromText(TrimmedText, ResolvedActionId);
+    Result.mDirection = ResolvedDirection;
     Result.mDeltaTicks = ExtractDeltaTicksFromText(TrimmedText);
     Result.mbSuccess = true;
 
