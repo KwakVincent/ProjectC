@@ -68,6 +68,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Voice")
     class UVKActiveActionComponent* GetActiveAction() const;
 
+    UFUNCTION(BlueprintCallable, Category="Voice")
+    class UVKTacticalCoordinatorComponent* GetTacticalCoordinator() const;
+
     FVKEmbeddingEncoderRunner* GetEncoderRunner() const;
 
     UPROPERTY(BlueprintAssignable, Category="Voice")
@@ -87,7 +90,12 @@ protected:
     virtual void EndPlay(EEndPlayReason::Type const EndPlayReason) override;
 
     void HandleSpeechRecognized(FString const& RecognizedText, double VadDurationMs, double SttDurationMs);
+
+    UFUNCTION()
     void HandleCommandUnrecognized(FString const& RawText);
+
+    UFUNCTION()
+    void HandleActionFinished(FName const& ActionId);
     void ExecuteCommandOnGameThread(EBotVoiceCommand Command, FString const& RawText);
     void ExecuteActionOnGameThread(
         FName const& ActionId,
@@ -124,6 +132,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Voice")
     TObjectPtr<class UVKActiveActionComponent> mActiveAction;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Voice")
+    TObjectPtr<class UVKTacticalCoordinatorComponent> mTacticalCoordinator;
 
     TUniquePtr<FVoicePipeline> mVoicePipeline;
     TUniquePtr<FVKEmbeddingEncoderRunner> mEncoderRunner;

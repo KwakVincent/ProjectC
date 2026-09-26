@@ -6,6 +6,7 @@
 #include "VKActionSelector.h"
 #include "VKEmbeddingEncoderRunner.h"
 #include "VKActionSpeechLearner.h"
+#include "VKTacticalCoordinatorComponent.h"
 #include "Misc/Paths.h"
 #include "Async/Async.h"
 
@@ -16,6 +17,7 @@ UVKVoiceCommanderComponent::UVKVoiceCommanderComponent()
     , mBufferRetentionTimeout(0.5f)
     , mActionPool(nullptr)
     , mActiveAction(nullptr)
+    , mTacticalCoordinator(nullptr)
     , mEncoderRunner(nullptr)
     , mActiveCommand(EBotVoiceCommand::None)
     , mRemainingMoveTime(0.0f)
@@ -98,6 +100,11 @@ UVKActiveActionComponent* UVKVoiceCommanderComponent::GetActiveAction() const
     return mActiveAction;
 }
 
+UVKTacticalCoordinatorComponent* UVKVoiceCommanderComponent::GetTacticalCoordinator() const
+{
+    return mTacticalCoordinator;
+}
+
 FVKEmbeddingEncoderRunner* UVKVoiceCommanderComponent::GetEncoderRunner() const
 {
     return mEncoderRunner.Get();
@@ -129,6 +136,15 @@ void UVKVoiceCommanderComponent::BeginPlay()
         mActiveAction = NewObject<UVKActiveActionComponent>(OwnerActor, TEXT("ActiveAction"));
         mActiveAction->RegisterComponent();
     }
+    mActiveAction->OnActionFinished.AddDynamic(this, &UVKVoiceCommanderComponent::HandleActionFinished);
+
+    mTacticalCoordinator = OwnerActor->FindComponentByClass<UVKTacticalCoordinatorComponent>();
+    if (mTacticalCoordinator == nullptr)
+    {
+        mTacticalCoordinator = NewObject<UVKTacticalCoordinatorComponent>(OwnerActor, TEXT("TacticalCoordinator"));
+        mTacticalCoordinator->RegisterComponent();
+    }
+    mTacticalCoordinator->OnApproachFailed.AddDynamic(this, &UVKVoiceCommanderComponent::HandleCommandUnrecognized);
 
     mEncoderRunner = MakeUnique<FVKEmbeddingEncoderRunner>();
     FString const ModelPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Models/ko_sroberta_onnx"));
@@ -274,6 +290,14 @@ void UVKVoiceCommanderComponent::HandleCommandUnrecognized(FString const& RawTex
     OnVoiceCommandUnrecognized.Broadcast(RawText);
 }
 
+void UVKVoiceCommanderComponent::HandleActionFinished(FName const& ActionId)
+{
+    if (mOwnerCharacter.IsValid())
+    {
+        mOwnerCharacter->SetStrafeMode(false);
+    }
+}
+
 void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
     FName const& ActionId,
     FVector const& Direction,
@@ -317,9 +341,30 @@ void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
         }
     }
 
-    if (ActionId == FName(TEXT("Stop")))
+    if (ActionId == FName(TEXT("ApproachEnemy")))
     {
         mbIsContinuousMoving = false;
+        mActiveAction->StopAction();
+        if (mOwnerCharacter.IsValid())
+        {
+            mOwnerCharacter->SetStrafeMode(false);
+        }
+        if (mTacticalCoordinator != nullptr)
+        {
+            mTacticalCoordinator->ExecuteApproachEnemy();
+        }
+    }
+    else if (ActionId == FName(TEXT("Stop")))
+    {
+        mbIsContinuousMoving = false;
+        if (mOwnerCharacter.IsValid())
+        {
+            mOwnerCharacter->SetStrafeMode(false);
+        }
+        if (mTacticalCoordinator != nullptr)
+        {
+            mTacticalCoordinator->StopTactics();
+        }
         mActiveAction->ApplyAction(ActionId, FVector::ZeroVector, 0.0f, 0.0f);
     }
     else if (bKeepUntilStop)
@@ -327,11 +372,21 @@ void UVKVoiceCommanderComponent::ExecuteActionOnGameThread(
         mbIsContinuousMoving = true;
         mContinuousDirection = Direction;
         mContinuousSpeedMultiplier = ActualSpeed;
+        if (mOwnerCharacter.IsValid())
+        {
+            bool const bIsStrafeOrBackward = (ActionId == FName(TEXT("FallBack")) || Direction.X < -0.3f || FMath::Abs(Direction.Y) > 0.3f);
+            mOwnerCharacter->SetStrafeMode(bIsStrafeOrBackward);
+        }
         mActiveAction->ApplyAction(ActionId, Direction, ActualSpeed, 0.0f);
     }
     else
     {
         mbIsContinuousMoving = false;
+        if (mOwnerCharacter.IsValid())
+        {
+            bool const bIsStrafeOrBackward = (ActionId == FName(TEXT("FallBack")) || Direction.X < -0.3f || FMath::Abs(Direction.Y) > 0.3f);
+            mOwnerCharacter->SetStrafeMode(bIsStrafeOrBackward);
+        }
         mActiveAction->ApplyAction(ActionId, Direction, ActualSpeed, ActualDuration);
     }
 

@@ -68,6 +68,18 @@ void UVKActionPoolComponent::InitializeDefaultActions()
     FallBackDef.mTriggerPhrases = { TEXT("후퇴해"), TEXT("물러서"), TEXT("거리 벌려"), TEXT("빠져"), TEXT("back off") };
     RegisterAction(FallBackDef);
 
+    FBotMovementActionDef ApproachDef;
+    ApproachDef.mActionId = FName(TEXT("ApproachEnemy"));
+    ApproachDef.mDisplayName = TEXT("적에게 접근");
+    ApproachDef.mDescription = TEXT("시야 내 최적 적을 찾아 내비게이션 경로로 접근");
+    ApproachDef.mSpeedMultiplier = 1.0f;
+    ApproachDef.mDefaultDuration = 5.0f;
+    ApproachDef.mAdaptiveDuration = 5.0f;
+    ApproachDef.mbIsUnlocked = true;
+    ApproachDef.mbCanTurn = true;
+    ApproachDef.mTriggerPhrases = { TEXT("적에게 접근해"), TEXT("적에게 다가가"), TEXT("적에게 가"), TEXT("접근해"), TEXT("다가가"), TEXT("approach") };
+    RegisterAction(ApproachDef);
+
     FBotMovementActionDef StopDef;
     StopDef.mActionId = FName(TEXT("Stop"));
     StopDef.mDisplayName = TEXT("정지");

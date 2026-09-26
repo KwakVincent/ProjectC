@@ -19,6 +19,7 @@ public class BattleRobot : ModuleRules
 			"AIModule",
 			"StateTreeModule",
 			"GameplayStateTreeModule",
+			"NavigationSystem",
 			"UMG",
 			"Slate"
 		});

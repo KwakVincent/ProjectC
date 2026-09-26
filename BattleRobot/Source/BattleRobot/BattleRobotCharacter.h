@@ -67,6 +67,9 @@ protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
+	/** Called for movement input completed */
+	void MoveEnd(const FInputActionValue& Value);
+
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
@@ -88,9 +91,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	void SetBackpedalMode(bool const bEnable);
+
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	bool IsBackpedaling() const;
+
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	void SetStrafeMode(bool const bEnable);
+
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	bool IsStrafing() const;
+
+	UFUNCTION(BlueprintPure, Category="Movement")
+	float GetMovementDirection() const;
+
 	/** Cheat Code: 'GodMode' in console (~) unlocks 10 consecutive action levels */
 	UFUNCTION(Exec)
 	void GodMode();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
+	bool mbIsBackpedaling = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
+	bool mbIsStrafing = false;
 
 public:
 

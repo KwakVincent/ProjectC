@@ -64,6 +64,7 @@ void ABattleRobotCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABattleRobotCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ABattleRobotCharacter::MoveEnd);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ABattleRobotCharacter::Look);
 
 		// Looking
@@ -77,40 +78,50 @@ void ABattleRobotCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 void ABattleRobotCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	// route the input
+	FVector2D const MovementVector = Value.Get<FVector2D>();
 	DoMove(MovementVector.X, MovementVector.Y);
+}
+
+void ABattleRobotCharacter::MoveEnd(const FInputActionValue& Value)
+{
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void ABattleRobotCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	// route the input
+	FVector2D const LookAxisVector = Value.Get<FVector2D>();
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
 }
 
 void ABattleRobotCharacter::DoMove(float Right, float Forward)
 {
-	if (GetController() != nullptr)
+	AController const* CurrentController = GetController();
+	if (CurrentController == nullptr)
 	{
-		// find out which way is forward
-		const FRotator Rotation = GetController()->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement 
-		AddMovementInput(ForwardDirection, Forward);
-		AddMovementInput(RightDirection, Right);
+		return;
 	}
+
+	bool const bIsStrafeOrBack = (Forward < -0.1f || FMath::Abs(Right) > 0.1f);
+	if (bIsStrafeOrBack)
+	{
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+	else
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+
+	FRotator const Rotation = CurrentController->GetControlRotation();
+	FRotator const YawRotation(0.0f, Rotation.Yaw, 0.0f);
+
+	FVector const ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	FVector const RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(ForwardDirection, Forward);
+	AddMovementInput(RightDirection, Right);
 }
 
 void ABattleRobotCharacter::DoLook(float Yaw, float Pitch)
@@ -146,4 +157,76 @@ void ABattleRobotCharacter::GodMode()
 		}
 		UE_LOG(LogTemp, Warning, TEXT("★ [치트 발동] GodMode 활성화! 연속 명령 10단계 최종 해금! (최대 10연속 액션 큐잉 가능)"));
 	}
+}
+
+void ABattleRobotCharacter::SetStrafeMode(bool const bEnable)
+{
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (MoveComp == nullptr)
+	{
+		return;
+	}
+
+	mbIsStrafing = bEnable;
+	mbIsBackpedaling = bEnable;
+
+	if (bEnable)
+	{
+		MoveComp->bOrientRotationToMovement = false;
+
+		AController const* CurrentController = GetController();
+		if (CurrentController != nullptr)
+		{
+			FRotator const ControlRot = CurrentController->GetControlRotation();
+			SetActorRotation(FRotator(0.0f, ControlRot.Yaw, 0.0f));
+		}
+	}
+	else
+	{
+		MoveComp->bOrientRotationToMovement = true;
+	}
+}
+
+bool ABattleRobotCharacter::IsStrafing() const
+{
+	return mbIsStrafing;
+}
+
+void ABattleRobotCharacter::SetBackpedalMode(bool const bEnable)
+{
+	SetStrafeMode(bEnable);
+}
+
+bool ABattleRobotCharacter::IsBackpedaling() const
+{
+	return mbIsBackpedaling;
+}
+
+float ABattleRobotCharacter::GetMovementDirection() const
+{
+	FVector const Velocity = GetVelocity();
+	if (Velocity.IsNearlyZero())
+	{
+		return 0.0f;
+	}
+
+	FRotator BaseRot = GetActorRotation();
+	AController const* CurrentController = GetController();
+	if (CurrentController != nullptr)
+	{
+		BaseRot = FRotator(0.0f, CurrentController->GetControlRotation().Yaw, 0.0f);
+	}
+
+	FMatrix const RotMatrix = FRotationMatrix(BaseRot);
+	FVector const ForwardVector = RotMatrix.GetScaledAxis(EAxis::X);
+	FVector const RightVector = RotMatrix.GetScaledAxis(EAxis::Y);
+	FVector const NormalizedVelocity = Velocity.GetSafeNormal2D();
+
+	float const ForwardDot = FVector::DotProduct(ForwardVector, NormalizedVelocity);
+	float const RightDot = FVector::DotProduct(RightVector, NormalizedVelocity);
+
+	float const AngleRadians = FMath::Atan2(RightDot, ForwardDot);
+	float const CalculatedDegrees = FMath::RadiansToDegrees(AngleRadians);
+
+	return CalculatedDegrees;
 }
