@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로봇대전 기획서 | TEAM 휴머트로닉 — 기능: 캐릭터 설정 및 표준 템플릿</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="로봇대전_기획서.html"><span class="brand-mark" aria-hidden="true">H</span> 로봇대전 <span class="muted">/ TEAM 휴머트로닉</span></a>
+      <nav aria-label="기획서 문서 이동">
+        <a href="로봇대전_기획서.html">메인 · 전체 흐름</a>
+        <a href="Scene_Title_Lobby.html">씬: 타이틀·로비·노심</a>
+        <a href="Scene_Shop.html">씬: 상점</a>
+        <a href="Scene_Training.html">씬: 훈련소</a>
+        <a href="Scene_Combat_Quest.html">씬: 퀘스트·전투·결과</a>
+        <a href="Feature_Control_Targeting.html">기능: 조작·타겟·이동AI</a>
+        <a href="Feature_Voice_Evaluation.html">기능: 음성·평가·성장</a>
+        <a href="Feature_Character_Setting.html" class="active" aria-current="page">캐릭터 설정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="character-template">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">01 / 표준 캐릭터 설정 템플릿</p>
+            <h2>모든 등장인물에 공통 적용하는 4대 설정 구조</h2>
+          </div>
+          <p class="section-desc">캐릭터의 세계관 서사와 인게임 씬(Scene)·기능적 역할을 일관되게 연결하기 위해 아래 4개 영역을 표준 템플릿으로 사용한다.</p>
+        </div>
+
+        <div class="training-loop" aria-label="표준 캐릭터 설정 템플릿 4대 영역">
+          <article class="training-phase">
+            <span class="step-number">TEMPLATE 01</span>
+            <h3>기본 프로필</h3>
+            <p>이름(가칭·코드네임), 성별·연령대, 소속·직책, 인게임 담당 씬(Scene)과 시스템 역할을 정의한다.</p>
+          </article>
+          <article class="training-phase">
+            <span class="step-number">TEMPLATE 02</span>
+            <h3>외형 · 시그니처 소품</h3>
+            <p>헤어·눈동자·신체 특징, 복장 스타일, 캐릭터 서사를 상징하는 시그니처 아이템과 대표 컬러 테마를 정의한다.</p>
+          </article>
+          <article class="training-phase">
+            <span class="step-number">TEMPLATE 03</span>
+            <h3>성격 · 호칭 · 상황별 대사</h3>
+            <p>성격의 입체성(표면과 내면), 말투와 화법 특징, 상대방 호칭, 담당 씬에서의 상황별 대표 대사 예시를 정의한다.</p>
+          </article>
+          <article class="training-phase">
+            <span class="step-number">TEMPLATE 04</span>
+            <h3>배경 서사 · 관계도</h3>
+            <p>외형적 특징이나 현재 직책을 갖게 된 과거 서사, 주인공·외계 인공지능(Artificial Intelligence, AI) 노심·타 인물과의 관계를 정의한다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="char-engineer">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">02 / 캐릭터 설정 — 천재 기술자</p>
+            <h2>을지 원 (코드네임: 메카닉)</h2>
+          </div>
+          <p class="section-desc">프로그래머 아버지와 기계공 어머니 밑에서 자라 소프트웨어(노심 파장 해석)와 하드웨어(TL1 프레임 제작)를 모두 통달한 젊은 여성 수석 엔지니어.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">캐릭터 02 · 표준 템플릿 적용</p>
+          <h3>정식 이름: 을지 원 (Eulji Won) <span class="muted" style="font-size:0.9rem;font-weight:normal">· 수석 엔지니어 (코드네임: 메카닉)</span></h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">전통 한국인 부모 (프로그래머 부 + 기계공 모)</span>
+            <span class="tag">곱슬기 있는 아주 짙은 흑단발</span>
+            <span class="tag">우안: 푸른 녹빛 기계 의안</span>
+            <span class="tag">우완: 팔꿈치 아래 기계 의수</span>
+            <span class="tag">거칠게 걸친 연구소 백의</span>
+            <span class="tag">호칭: 파트너 / 테스트 1호</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">템플릿 영역</th>
+                <th scope="col">세부 항목</th>
+                <th scope="col">확정 설정 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 기본 프로필</strong></td>
+                <td>이름 / 출신 / 담당 씬</td>
+                <td>
+                  <strong>· 정식 이름 (코드네임)</strong>: <strong>을지 원 (Eulji Won)</strong> / 수석 엔지니어 (코드네임: 메카닉)<br>
+                  <strong>· 출신 및 가족 배경</strong>: <strong>전통 한국인 부모님(국적: 한국)</strong> 밑에서 성장 — <strong>프로그래머인 아버지</strong>와 <strong>기계공(메카닉)인 어머니</strong>에게서 소프트웨어와 하드웨어 양쪽의 천재성을 물려받음<br>
+                  <strong>· 성별 및 연령대</strong>: 젊은 여성<br>
+                  <strong>· 소속 및 직책</strong>: 인류 저항군 기지 기술연구국 수석 엔지니어 (외계 노심 이식 최초 제안자 · TL1 프레임 설계자)<br>
+                  <strong>· 인게임 담당 씬</strong>: 최초 접속 시 가벼운 전투 튜토리얼 가이드 · 기지 격납고(장비·노심 장착 및 새 노심 데이터 전이 집도) · 훈련소(액션 생성 및 동작 시험 안내) 전담 <em>(퀘스트 브리핑 및 상점은 별도 분리)</em>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 외형 · 시그니처 소품</strong></td>
+                <td>헤어 / 의안 / 의수 / 복장</td>
+                <td>
+                  <strong>· 헤어 스타일</strong>: 약간의 곱슬기가 있는 <strong>아주 짙은 흑단발</strong><br>
+                  <strong>· 시그니처 1 (기계 의안)</strong>: <strong>오른쪽 눈이 푸른 녹빛(청록빛)을 내는 기계 의안</strong>으로 되어 있어 외계 노심의 에너지 파장과 안정도를 실시간으로 시각 계측함<br>
+                  <strong>· 시그니처 2 (기계 의수)</strong>: <strong>오른팔이 팔꿈치 아래부터 기계화</strong>되어 있으며, 고출력 외계 노심 배선과 정밀 인터페이스를 직접 다룰 수 있는 구조로 설계됨<br>
+                  <strong>· 복장 및 소품</strong>: 단정한 연구소 백의(실험 가운)를 거칠게 걸친 스타일, 목에 건 다중 보안 카드와 노심 공명 이어피스 (사이버 시안·화이트 컬러 포인트)
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 성격 · 호칭 · 화법</strong></td>
+                <td>성향 / 호칭 / 말투</td>
+                <td>
+                  <strong>· 성격</strong>: 평소에는 격식 없고 털털한 괴짜 연구자이지만, 외계 노심 해석과 로봇 정비 앞에서는 무서울 정도의 집념과 열정을 불태우는 행동파 천재<br>
+                  <strong>· 주인공 호칭</strong>: <strong>‘파트너’</strong> 또는 <strong>‘테스트 1호’</strong><br>
+                  <strong>· 화법 특징</strong>: 반말과 메카닉·노심 공학 전문 용어를 자연스럽게 섞어 쓰며, 주인공과 격의 없이 티키타카하는 친근하고 텐션 높은 화법
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 배경 서사 · 관계도</strong></td>
+                <td>가계 배경 / 기계화 과거사 / 관계</td>
+                <td>
+                  <strong>· 프로그래머 아버지 + 기계공 어머니의 유산</strong>: 아버지에게서 배운 프로그래밍·AI 파장 해석 능력과 어머니에게서 배운 중장비·로봇 기계공학 기술을 결합해, 인류 누구도 해내지 못했던 <strong>‘외계 노심의 기계 프레임(TL1) 직결 이식’</strong>을 완성했다. 또한 전통 한국인 가정에서 자랐기에 구시대 군사 위성 전술 AI를 개조할 때 한국적 영물인 <strong>백호(‘홀랑이’)</strong>와 한글 <strong>‘휴’ 마크</strong>를 디자인해 넣었다.<br>
+                  <strong>· 오른팔 기계 의수 &amp; 청록빛 의안의 서사</strong>: 과거 외계 세력의 습격 당시 주인공과 단일 프레임 <strong>TL1</strong>을 지키다 오른쪽 눈과 오른팔(팔꿈치 아래)을 잃었다. 절망하는 대신 <em>“우리를 짓밟은 적의 심장(외계 노심)을 역이용해 인류의 로봇을 움직이겠다”</em>는 집념으로 노심 파장을 읽는 푸른 녹빛 기계 의안과 노심 제어용 기계 의수를 장착했다.<br>
+                  <strong>· 인물 관계도</strong>: 주인공(생사와 연구를 함께한 유일무이한 실전 파트너), 아람 드 몽샤랭(기지 예산과 부품 문제로 티격태격하는 상점 보급관이자 절친), 파트너 노심(을지 원이 다가오면 경계하며 적대적인 전자음을 내지만 원은 아랑곳하지 않고 연구 대상으로 흥미로워함).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="scenario" style="margin-top:20px">
+            <div>
+              <p class="eyebrow">상황별 대사 예시 (말투 &amp; 티키타카)</p>
+              <blockquote>“야, 테스트 1호! 마이크 감도 체크해. 내 오른눈 의안에 노심 파장이 요동치는 거 안 보여? 네가 똑바로 말해 줘야 저 녀석이 움직인다고!”</blockquote>
+            </div>
+            <div>
+              <p><strong>· 튜토리얼 (최초 전투)</strong>: “겁먹지 마, 파트너. 기본 이동 코드는 내가 노심에 이미 심어 놨으니까, 넌 조준간 꽉 잡고 입으로 명령만 내려!”<br>
+              <strong>· 기지 격납고 (노심 전이)</strong>: “새 노심 출력 죽이는데? 걱정 마, 네가 그동안 가르친 이동 습관이랑 교감 데이터는 이 기계팔로 1비트도 안 빼놓고 전부 새 노심에 전이해 줄게. 남는 구형 노심은 격납고 선반에 멋지게 장식해 두자고.”<br>
+              <strong>· 훈련소 (액션 생성)</strong>: “타겟 정면 3m? 오케이, 음성 텍스트 변환(Speech-to-Text, STT) 파형 깔끔하게 들어왔어. 한 번 굴려 보고 네 마음에 들면 바로 등록 버튼 눌러!”</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="char-pilot">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">03 / 캐릭터 설정 — 주인공</p>
+            <h2>플레이어 파일럿 (코드네임: 테스트 1호 / 파트너)</h2>
+          </div>
+          <p class="section-desc">로봇에 직접 탑승해 공격 조종간을 잡고, 자신의 목소리로 외계 노심과 호흡을 맞추는 실전 테스트 파일럿.</p>
+        </div>
+
+        <article class="panel">
+          <p class="eyebrow">캐릭터 01 · 표준 템플릿 적용</p>
+          <h3>실전 테스트 파일럿 (플레이어 자신)</h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">직접 탑승형 파일럿</span>
+            <span class="tag">헬멧 · 파일럿 슈트</span>
+            <span class="tag">최초의 노심 교감 성공자</span>
+            <span class="tag">실제 마이크 음성 투영</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">템플릿 영역</th>
+                <th scope="col">세부 항목</th>
+                <th scope="col">확정 설정 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 기본 프로필</strong></td>
+                <td>포지션 / 소속 / 역할</td>
+                <td>
+                  <strong>· 호칭(코드네임)</strong>: 테스트 1호 / 파트너 (천재 기술자가 부르는 호칭) 및 플레이어 계정명<br>
+                  <strong>· 포지션</strong>: 거대 로봇 콕핏에 직접 탑승하는 전담 파일럿<br>
+                  <strong>· 인게임 역할</strong>: 화면 중앙 에임 조준 및 직접 공격 조작 + 기체 내부 통신을 통한 외계 노심 이동 음성 명령 및 칭찬·비난 평가
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 외형 · 시그니처 소품</strong></td>
+                <td>표현 방식 / 장비</td>
+                <td>
+                  <strong>· 외형 표현</strong>: 플레이어 본인의 실제 목소리가 곧 주인공의 목소리가 되므로, 자기 투영감을 극대화하기 위해 <strong>전술 헬멧과 파일럿 슈트를 착용한 모습(또는 성별 선택형)</strong>으로 표현<br>
+                  <strong>· 시그니처 소품</strong>: 외계 노심과 내부 음성 채널을 직결하는 헬멧 보이스 링크 및 하프액션 사격 조종간
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 성격 · 호칭 · 화법</strong></td>
+                <td>플레이어 발화 직결</td>
+                <td>
+                  <strong>· 화법 특징</strong>: 별도의 고정 성우 대사 대신 <strong>플레이어가 마이크로 직접 발화하는 명령어와 칭찬·비난</strong> 자체가 주인공의 대사이자 노심과의 대화 수단이 됨
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 배경 서사 · 관계도</strong></td>
+                <td>최초 교감 서사 / 관계</td>
+                <td>
+                  <strong>· 배경 서사</strong>: 천재 기술자와 함께 외계 침공군의 습격에서 살아남은 뒤, 자아가 있어 아무의 말도 듣지 않던 최초의 외계 노심과 수백 번의 대화와 시행착오를 거듭해 마침내 첫 교감과 음성 훈련 체계를 확립한 실전 테스트 파일럿.<br>
+                  <strong>· 관계도</strong>: 천재 기술자(생사와 연구를 함께한 파트너), 외계 노심(전장에서 생명과 호흡을 공유하는 동료), 상점 보급관(노획 물자를 거래하는 최대 VIP 고객 관계).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="char-broker">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">04 / 캐릭터 설정 — 상점 보급관</p>
+            <h2>아람 드 몽샤랭 (코드네임: 브로커)</h2>
+          </div>
+          <p class="section-desc">한국인 어머니와 프랑스인 아버지 사이에서 태어난 프랑스 국적의 무기상으로, 구시대 거대 군수 기업의 무기 창고를 통째로 빼돌려 저항군 기지 상점을 장악한 능글맞고 계산 빠른 보급관.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">캐릭터 03 · 표준 템플릿 적용</p>
+          <h3>정식 이름: 아람 드 몽샤랭 (Aram de Montchalin) <span class="muted" style="font-size:0.9rem;font-weight:normal">· 상점 보급관 (코드네임: 브로커)</span></h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">한국인 어머니 + 프랑스인 아버지 (국적: 프랑스)</span>
+            <span class="tag">금발 + 흑발이 잘 섞인 투톤 헤어 (포니테일/올림머리)</span>
+            <span class="tag">금빛(호박색) 눈동자</span>
+            <span class="tag">정장 + 방탄 앞치마 (와인레드·실버)</span>
+            <span class="tag">어깨 위 감정용 소형 드론</span>
+            <span class="tag">호칭: 호구... 아니 고객님!</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">템플릿 영역</th>
+                <th scope="col">세부 항목</th>
+                <th scope="col">확정 설정 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 기본 프로필</strong></td>
+                <td>이름 / 국적 / 담당 씬</td>
+                <td>
+                  <strong>· 정식 이름 (코드네임)</strong>: <strong>아람 드 몽샤랭 (Aram de Montchalin)</strong> / 상점 보급관 (코드네임: 브로커)<br>
+                  <strong>· 출신 및 현재 국적</strong>: <strong>한국인 어머니와 프랑스인 아버지</strong> 사이에서 태어난 한불 혼혈 · <strong>현재 국적: 프랑스</strong><br>
+                  <strong>· 성별 및 연령대</strong>: 젊은 여성<br>
+                  <strong>· 소속 및 직책</strong>: 인류 저항군 기지 상점 총괄 보급관 (전직 유럽계 거대 다국적 군수 기업 핵심 유통 책임자)<br>
+                  <strong>· 인게임 담당 씬</strong>: <strong>상점 씬 (<a href="Scene_Shop.html">Scene_Shop.html</a>) 전담</strong> — TL1 파츠·무기·방어구·보조장치 비교 및 구매, 전투에서 노획한 외계 적 물자 감정 및 매입 거래
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 외형 · 시그니처 소품</strong></td>
+                <td>헤어 / 눈동자 / 복장 / 소품</td>
+                <td>
+                  <strong>· 헤어 &amp; 눈동자</strong>: 한국인 어머니의 <strong>흑발</strong>과 프랑스인 아버지의 <strong>금발</strong>이 세련되게 잘 섞인 <strong>금발+흑발 투톤 헤어(포니테일/올림머리)</strong> + 돈과 희귀 외계 부품을 계산할 때 반짝이는 <strong>금빛(호박색) 눈동자</strong> <em>(수석 엔지니어 ‘을지 원’의 아주 짙은 흑단발·청록빛 의안과 뚜렷한 시각적 대비)</em><br>
+                  <strong>· 복장 스타일</strong>: 세련된 정장 위에 중화기·부품 취급용 <strong>방탄 앞치마</strong>를 두른 암시장 브로커 스타일 (와인레드·실버 컬러 포인트)<br>
+                  <strong>· 시그니처 소품</strong>: <strong>어깨 위에서 노획 물자의 순도와 가치를 실시간 스캔·감정하는 소형 드론</strong>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 성격 · 호칭 · 화법</strong></td>
+                <td>성향 / 호칭 / 말투</td>
+                <td>
+                  <strong>· 성격</strong>: 돈과 희귀 외계 부품 냄새를 기막히게 맡는 능글맞고 계산 빠른 상인이지만, 자신의 유일한 VIP 고객인 주인공이 살아 돌아와야 장사도 계속된다며 최고급 장비를 챙겨 주는 현실주의 조력자<br>
+                  <strong>· 주인공 호칭</strong>: <strong>‘호구... 아니 고객님!’</strong>, <strong>‘VIP 고객님’</strong><br>
+                  <strong>· 화법 특징</strong>: <strong>극존칭(<em>“~하셨습니까, 호구... 아니 고객님!”</em>)</strong>을 구사하며 유쾌하게 농담을 던지는 만담형 브로커 화법
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 배경 서사 · 관계도</strong></td>
+                <td>과거 서사 / 앙숙·절친 관계</td>
+                <td>
+                  <strong>· 배경 서사</strong>: 한국인 어머니에게서 받은 이름 ‘아람’과 프랑스 귀족계 아버지의 성 ‘드 몽샤랭’을 지녔다. 원래 거대 다국적 군수 기업의 핵심 유통 책임자였으나, 외계 세력의 침공으로 지구의 78.5%가 점령당하며 기업이 붕괴하자 비자금과 비밀 무기 창고를 통째로 빼돌려 저항군 기지의 보급관이 되었다.<br>
+                  <strong>· 인물 관계도</strong>: 수석 엔지니어 <strong>‘을지 원’</strong>과는 기지 예산과 희귀 외계 부품 독점 문제로 만나기만 하면 티격태격하는 앙숙이자, 주인공의 <strong>TL1</strong>을 강화하기 위해 최고급 파츠를 조달하는 절친 관계다.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="scenario" style="margin-top:20px">
+            <div>
+              <p class="eyebrow">상황별 대사 예시 (만담형 브로커 화법)</p>
+              <blockquote>“어서 오십시오, 호구... 아니, 저의 영원한 VIP 고객님! 오늘도 전장에서 짭짤한 외계 전리품들을 두둑이 챙겨 오셨군요?”</blockquote>
+            </div>
+            <div>
+              <p><strong>· 노획 물자 판매 시</strong>: “자, 제 어깨 위 드론이 스캔한 감정가입니다! 에이, 눈 흘기지 마십시오~ 저 괴짜 엔지니어 ‘을지 원’이 연구비로 다 털어간 기지 예산을 메우려면 저 아람 드 몽샤랭도 남는 게 있어야죠!”<br>
+              <strong>· 고성능·고중량 장비 비교 시</strong>: “고객님, 안목은 기막히시네요! 다만 이 무기는 중량과 에너지 소모가 상당합니다. 지금 장착하신 외계 노심 출력으로 감당이 될지 비교표부터 꼼꼼히 확인하시죠!”<br>
+              <strong>· 장비 구매 완료 시</strong>: “거래 성사입니다! 장착과 세팅은 격납고에 있는 그 짙은 흑단발 괴짜 엔지니어(을지 원)에게 맡기시고, 다음 전투에서도 꼭 살아서 제 지갑을... 아니, 지구를 지켜 주십시오!”</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="char-operator">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">05 / 캐릭터 설정 — 작전 오퍼레이터 (마스코트)</p>
+            <h2>작전 오퍼레이터 · 홀랑이 (Hologram + Tiger)</h2>
+          </div>
+          <p class="section-desc">천재 기술자가 구시대 군사 위성 전술 인공지능(Artificial Intelligence, AI)을 개조해 만든 귀여운 2등신(Super Deformed, SD) 홀로그램 메카 백호 마스코트.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">캐릭터 04 · 표준 템플릿 적용 (기지 마스코트)</p>
+          <h3>정식 이름: 홀랑이 <span class="muted" style="font-size:0.9rem;font-weight:normal">· 홀로그램(Hologram) + 호랑이(Tiger) / 자칭 ‘엘리트 작전 참모’</span></h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">2등신(SD) 홀로그램 메카 백호</span>
+            <span class="tag">백색 바디 + 빛나는 옅은 파랑 줄무늬</span>
+            <span class="tag">이마 시그니처: ‘王’ 자를 닮은 ‘휴’ 마크</span>
+            <span class="tag">자칭 엘리트 작전 참모</span>
+            <span class="tag">호칭: 대장님!</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">템플릿 영역</th>
+                <th scope="col">세부 항목</th>
+                <th scope="col">확정 설정 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 기본 프로필</strong></td>
+                <td>이름 / 정체 / 담당 씬</td>
+                <td>
+                  <strong>· 정식 이름</strong>: <strong>홀랑이</strong> (홀로그램 + 호랑이)<br>
+                  <strong>· 형태 및 정체</strong>: 귀여운 2등신(SD) 홀로그램 메카 백호 (인류 저항군 기지 작전 통제실 전술 연산 AI 마스코트)<br>
+                  <strong>· 인게임 담당 씬</strong>: <strong>퀘스트 선택 씬 · 전투 스테이지 씬(임무 브리핑 및 전황 중계) · 전투 결과 씬(보상 및 평가 정산 안내) 전담</strong> (<a href="Scene_Combat_Quest.html">Scene_Combat_Quest.html</a>)
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 외형 · 시그니처 소품</strong></td>
+                <td>컬러 / 줄무늬 / 이마 마크</td>
+                <td>
+                  <strong>· 바디 &amp; 컬러 테마</strong>: 둥글고 귀여운 2등신 메카 호랑이 홀로그램으로, 기본 컬러는 <strong>백색(White)</strong>이며 호랑이 줄무늬는 <strong>빛나는 옅은 파랑(네온 라이트 블루)</strong>으로 사이버틱하고 귀엽게 발광함<br>
+                  <strong>· 시그니처 마크 (‘휴’ 엠블럼)</strong>: 호랑이 이마의 한자 ‘임금 왕(王)’ 자 무늬 대신, <strong>팀명 ‘휴머트로닉’의 앞글자 ‘휴’를 ‘王’ 자와 비슷하게 기하학적으로 디자인한 푸른 발광 마크</strong>가 이마 정중앙에 박혀 있음
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 성격 · 호칭 · 화법</strong></td>
+                <td>성향 / 호칭 / 말투</td>
+                <td>
+                  <strong>· 성격</strong>: 겉모습은 작고 귀여운 2등신 아기 메카 백호지만, 본인은 스스로를 위엄 넘치는 영물의 후예이자 기지 최고의 <strong>‘엘리트 작전 참모’</strong>라고 굳게 믿고 있음<br>
+                  <strong>· 주인공 호칭</strong>: <strong>‘대장님!’</strong><br>
+                  <strong>· 화법 특징</strong>: 평소에는 군대식 다나까 말투(<em>“~입니다, 대장님!”, “출격 허가합니다!”</em>)를 야무지고 절도 있게 구사하지만, 기습을 당하거나 당황하면 말투가 풀리며 귀여운 호랑이 본능이 튀어나오는 갭모에 화법
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 배경 서사 · 관계도</strong></td>
+                <td>탄생 비화 / 인물 관계</td>
+                <td>
+                  <strong>· 배경 서사</strong>: 원래는 침공 이전 구시대 군사 위성의 딱딱하고 무미건조한 전술 AI였으나, <strong>천재 기술자(수석 엔지니어)</strong>가 기지 메인프레임으로 개조하면서 자신의 취향과 팀(휴머트로닉)의 상징인 <strong>‘휴’ 마크</strong>를 넣어 귀여운 2등신 메카 백호 홀로그램 ‘홀랑이’로 재탄생시켰다.<br>
+                  <strong>· 인물 관계도</strong>: 주인공(‘대장님’이라 부르며 충성을 다하는 지휘관), 천재 기술자(자신을 귀여운 2등신으로 만들어 놓은 장본인이라 위엄 있는 맹수 외형으로 바꿔 달라고 늘 투덜댐), 파트너 외계 노심(기지 전술 AI 마스코트와 콕핏 외계 코어 마스코트로서 대조를 이루는 양대 마스코트).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="scenario" style="margin-top:20px">
+            <div>
+              <p class="eyebrow">상황별 대사 예시 (엘리트 참모 다나까 &amp; 당황 시 말투 풀림)</p>
+              <blockquote>“작전 브리핑을 시작합니다, 대장님! 이번 목표는 제3구역 적 기지 침공입니다! 이 엘리트 참모 홀랑이가 완벽한 경로를 산출해 두었습니다, 어흥!”</blockquote>
+            </div>
+            <div>
+              <p><strong>· 퀘스트 선택 씬</strong>: “대장님! 적 물자 약탈전 임무가 포착되었습니다! 난이도는 높지만 노획 물자가 아주 짭짤할 것으로 분석됩니다. 출격 허가합니다!”<br>
+              <strong>· 전투 중 돌발 상황 (말투 풀림)</strong>: “경고! 전방에 고출력 외계 반응이… 히익?! 대, 대장님! 적이 갑자기 너무 많이 몰려오는데용?! 아, 아니, 당황하지 않았습니다! 즉시 회피 기동 명령을 내려 주십시오!!”<br>
+              <strong>· 전투 결과 씬 (성공/포기 정산)</strong>: “전투 데이터 집계 완료입니다, 대장님! 전투 중 카운팅된 대장님의 칭찬과 비난 평가를 노심 성장 데이터에 일괄 반영하겠습니다!”</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="char-core">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">06 / 캐릭터 설정 — 파트너 외계 노심 인격체 (마스코트)</p>
+            <h2>인류 호칭: 별똥이 / 외계 진명: 아캄 디오 루 (‘루’ 혈통)</h2>
+          </div>
+          <p class="section-desc">로봇(TL1)의 심장부에서 에너지를 공급하고 플레이어의 목소리에 반응해 기체를 움직이는 도도한 구체·결정 정령형 외계 지성체 마스코트.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">캐릭터 05 · 표준 템플릿 적용 (파트너 코어 마스코트 · 이중 이름 구조)</p>
+          <h3>인류 호칭: 별똥이 <span class="muted" style="font-size:0.9rem;font-weight:normal">· 외계 진명: 아캄 디오 루 (Akam Dio Lu) / ‘루(Lu)’ 세력 혈통</span></h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">인류 호칭: 별똥이 (을지 원 작명)</span>
+            <span class="tag">외계 진명: 아캄 디오 루 (‘루’ 혈통)</span>
+            <span class="tag">구체/결정 슬라임·정령형 메카 마스코트</span>
+            <span class="tag">부유형 날개·귀·표정 파츠</span>
+            <span class="tag">단일 자아 전이 · 외형 진화형</span>
+            <span class="tag">인간 언어 대답 불가 (외계 전자음)</span>
+            <span class="tag">도도하고 자존심 강한 츤데레</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">템플릿 영역</th>
+                <th scope="col">세부 항목</th>
+                <th scope="col">확정 설정 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 기본 프로필</strong></td>
+                <td>이중 이름 / 혈통 / 담당 씬</td>
+                <td>
+                  <strong>· 인류 측 정식 호칭</strong>: <strong>별똥이</strong> — 하늘(우주)에서 별똥별처럼 빛나며 떨어진 외계 결정체 노심이라 하여 수석 엔지니어 <strong>‘을지 원’</strong>이 지어준 마스코트 이름 <em>(‘홀랑이’와 짝을 이루는 을지 원 특유의 한국식 네이밍 센스)</em><br>
+                  <strong>· 외계 본래 진명 (혈통)</strong>: <strong>아캄 디오 루 (Akam Dio Lu)</strong> — 외계 4대 세력(루·쿠·엘·라) 중 <strong>‘루(Lu)’ 세력(혈통)</strong> 출신의 고귀한 진명<br>
+                  <strong>· 형태 및 정체</strong>: 자아를 지닌 구체·결정 슬라임/정령형 외계 인공지능(Artificial Intelligence, AI) 노심 마스코트<br>
+                  <strong>· 인게임 담당 씬</strong>: <strong>로비(격납고 교감 및 노심 전이) · 훈련소(새 액션 학습 및 동작 시험 수행) · 전투 스테이지 씬(음성 이동 명령 수행 및 칭찬·비난 감정 반응) · 전투 결과 씬(적합성·레벨·유대 성장 연출)</strong> 전담
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 외형 · 시그니처 소품</strong></td>
+                <td>결정체 코어 / 부유 파츠 / 진화</td>
+                <td>
+                  <strong>· 기본 외형</strong>: 빛나는 외계 코어 구슬(결정체) 중심부에 말랑하고 신비로운 에너지 외피가 감싸고 있으며, 주변에 작은 <strong>부유형 날개·귀·표정 파츠</strong>가 자력처럼 떠다니는 정령형 메카 마스코트 <em>(인류제 각진 메카 백호 ‘홀랑이’와 완벽한 조형적 대비)</em><br>
+                  <strong>· 시그니처 연출 (노심 교체에 따른 외형 진화)</strong>: 상위 고출력 노심으로 교체(전이)할 때마다 중심 결정체의 빛깔과 주변을 맴도는 부유형 날개·왕관 고리 파츠가 더욱 화려하고 고차원적인 형태로 진화함
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 성격 · 호칭 · 화법</strong></td>
+                <td>외계 전자음 / 도도한 태도</td>
+                <td>
+                  <strong>· 의사소통 방식 (언어 비대칭 구조)</strong>: <strong>파트너 노심은 인간들의 언어를 대충 알아듣게 되었지만, 인간들은 노심의 외계 전자음·파장음(예: <em>“삐리릭—!”, “우웅… 피쓩!”, “띠리링♪”</em>)을 알아들을 수 없다.</strong> 따라서 인류는 이 세계의 진실(지구가 감옥이라는 사실 등)을 노심으로부터 직접 들을 수 없으며, 오직 몸체의 발광 색상과 부유 날개·귀 파츠의 움직임(바디랭귀지)으로만 감정을 짐작한다 <em>(동시에 성우 음성이 플레이어 마이크 입력에 섞여 음성 활동 감지(Voice Activity Detection, VAD)를 방해하는 문제를 원천 차단하는 설계 원리)</em>.<br>
+                  <strong>· 성격 특징 (주인공 한정 순애 &amp; 타인에 대한 적대감)</strong>: <strong>도도하고 자존심이 매우 강한 상위 지성체 성향</strong>이며, <strong>오직 주인공에게만 협조적이고 다른 인간 캐릭터들에게는 매우 적대적</strong>이다. 주인공 앞에서도 자존심 때문에 비난을 받으면 파츠를 부르르 떨며 토라지고 칭찬을 받으면 새침한 척 고개를 돌리면서도 날개 파츠를 신나게 파닥거리지만, 다른 인간(천재 기술자 등)이 건드리려 하면 날카로운 경계 파장을 뿜어낸다.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 배경 서사 · 관계도</strong></td>
+                <td>단일 자아 전이 / 과거의 연인(숨겨진 진실)</td>
+                <td>
+                  <strong>· [심층 스포일러 · 떡밥 설정] 주인공을 돕는 진짜 이유</strong>: 사실 인간들의 정체는 외계 문명 <strong>‘라 쿠엘루 퀠라’</strong>에서 죄를 짓고 지구라는 감옥에 갇혀 <strong>‘영혼(기체 형태의 노심)’</strong> 상태로 활동하던 죄수들이다. 파트너 노심은 주인공의 육체 안에 깃든 ‘영혼 형태의 노심(주인공)’이 <strong>아주 먼 과거 ‘라 쿠엘루 퀠라’ 시절 자신의 연인</strong>이었음을 알아보고, 감옥 리셋(수감자 몰살) 위기에서 오직 그를 지키기 위해 스스로 로봇의 심장이 되어 도와주는 것이다.<br>
+                  <strong>· 단일 자아 전이 및 트로피 수집 서사</strong>: 상위 고출력 노심을 획득해 교체할 때, 파트너 노심의 <strong>‘자아와 기억(및 모든 훈련 데이터)’이 새 노심(그릇)으로 통째로 이사(전이)</strong>한다. 자아가 빠져나간 구형 노심 껍데기(결정체)는 기지 격납고에 트로피로 수집·전시된다.<br>
+                  <strong>· 인물 관계도</strong>: <strong>주인공</strong>(먼 과거의 연인이자 유일하게 마음을 허락하고 지켜주려는 존재), <strong>천재 기술자 · 상점 보급관 · 홀랑이 등 다른 캐릭터들</strong>(자신의 연인을 제외한 나머지 수감자·인류 기계들에는 본능적으로 매우 적대적이며 차갑게 경계함).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="scenario" style="margin-top:20px">
+            <div>
+              <p class="eyebrow">상황별 반응 예시 (외계 전자음 + 도도한 바디랭귀지)</p>
+              <blockquote>“우웅… 삐리릿! (날개 파츠를 도도하게 접으며 ‘흥, 네가 말 안 해도 그 정도 기동은 알고 있었다’는 듯 새침하게 붉은 빛을 깜빡인다.)”</blockquote>
+            </div>
+            <div>
+              <p><strong>· 전투 중 ‘칭찬’ 평가를 받았을 때</strong>: “띠리링—♪ 피쓩! (몸체 결정이 밝게 빛나며 겉으로는 도도하게 몸을 돌리지만, 양옆의 작은 부유 귀·날개 파츠가 주체하지 못하고 신나게 파닥거린다.)”<br>
+              <strong>· 전투 중 ‘비난’ 평가를 받았을 때</strong>: “찌지직… 부우웅—! (자존심이 상한 듯 코어 표면이 붉게 부풀어 오르며 날개 파츠를 뾰족하게 세우고 억울하다는 듯 진동한다.)”<br>
+              <strong>· 격납고에서 상위 노심으로 ‘전이’했을 때</strong>: “슈우웅— 삐리리링!! (새 노심 결정체로 자아가 안착하며 한층 화려해진 부유 날개 파츠를 쫙 펼쳐 보이고, 주인공을 향해 자랑스러워하는 파장음을 울린다.)”</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="mech-tl1">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">07 / 기체 설정 — 주인공 전용 단일 가변 프레임</p>
+            <h2>코드네임: TL1 (The Last 1 — 인류의 마지막 희망)</h2>
+          </div>
+          <p class="section-desc">천재 기술자가 자신의 오른눈과 오른팔을 잃어가며 지켜낸 유일한 외계 노심 직결형 단일 기체 프레임으로, 코어 1슬롯과 파츠 5슬롯 조합에 따라 외형과 전투 병과가 완전히 탈바꿈한다.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">아군 기체 아키텍처 · 단일 기체 프레임 개조형 (파츠 조립식)</p>
+          <h3>정식 코드네임: TL1 <span class="muted" style="font-size:0.9rem;font-weight:normal">· The Last 1 (인류의 마지막 희망)</span></h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">단일 기체 프레임 개조형</span>
+            <span class="tag">외계 노심 직결 소체</span>
+            <span class="tag">코어 1슬롯 + 파츠 5슬롯</span>
+            <span class="tag">표준 밸런스 / 고기동 강습 / 중장갑 화력</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">구분 영역</th>
+                <th scope="col">슬롯 / 병과 명칭</th>
+                <th scope="col">확정 설정 및 메카닉 원리</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 기체 정체성</strong></td>
+                <td><strong>코드네임: TL1<br>(The Last 1)</strong></td>
+                <td>
+                  <strong>· 명칭의 의미</strong>: 지구의 78.5%가 점령당한 절망 속에서 인류에게 남겨진 <strong>‘마지막 단 하나의 기체이자 희망(The Last 1)’</strong>을 뜻한다.<br>
+                  <strong>· 단일 프레임 설계 원리</strong>: 일반 양산형 기체는 외계 인공지능(Artificial Intelligence, AI) 노심의 고출력 파장을 견디지 못하고 회로가 소손된다. <strong>TL1</strong>은 천재 기술자가 연구소 습격 당시 자신의 오른눈과 오른팔을 바쳐 지켜낸 유일무이한 <strong>‘외계 노심 직결형 가변 소체’</strong>로, 다른 기체로 갈아타는 대신 TL1 프레임 위에 고출력 노심과 파츠를 조립·개조하며 끝까지 함께 성장한다.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 장착 슬롯 구조</strong></td>
+                <td><strong>코어 1슬롯 +<br>외장 파츠 5슬롯</strong></td>
+                <td>
+                  <strong>· ⚡ 코어 슬롯 (Core Vessel)</strong>: 파트너 노심이 전이(이사)해 들어가는 심장부. 기체의 <strong>총 허용 출력(에너지 한계)과 기본 성능 배율</strong>을 결정한다.<br>
+                  <strong>· ① 헤드·센서 (Head / Sensor)</strong>: 에임 타겟(‘타겟’) 록온 유지 각도, 조준 보정, 음성 명령 전달 반응 속도를 결정한다.<br>
+                  <strong>· ② 코어 아머 (Body / Chest Armor)</strong>: 흉부 노심을 보호하는 중심 장갑. 기본 내구도(체력), 방어력, 피격 경직 저항을 결정한다.<br>
+                  <strong>· ③ 암·주무장 마운트 (Arms / Primary Weapon)</strong>: 플레이어가 직접 조준·공격 조작하는 주무기(라이플, 중화기 캐논, 근접 곡검·랜서 등) 장착부.<br>
+                  <strong>· ④ 레그·구동부 (Legs / Chassis)</strong>: 지상 이동 속도, 대시 거리, 도약력 등 <strong>음성 이동 명령 수행 속도</strong>에 직결되는 하체 구동부.<br>
+                  <strong>· ⑤ 백팩·부스터 (Backpack / Thruster)</strong>: 순간 부스트 출력, 체공 시간 및 보조 무장(미사일 포드·실드 제네레이터)을 담당한다.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 대표 파츠 세트 01</strong></td>
+                <td><strong>표준 밸런스형<br>(프로토타입 / 랜서 세트)</strong></td>
+                <td>
+                  <strong>· 외형 및 요구 출력</strong>: 백색·청색·적색 트리콜로 도장의 정통 건담풍 표준 장갑 (초기형 저출력 노심부터 운용 가능, 튜토리얼·초반 기본 장착)<br>
+                  <strong>· 주무장 &amp; 음성 기동 특성</strong>: 표준 빔 라이플 / 에너지 랜서 &amp; 실드. 전 방향 균형 잡힌 대시·엄폐·사격각 확보로 음성 명령과 직접 사격의 합을 익히기 가장 좋은 올라운더 구성.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 대표 파츠 세트 02</strong></td>
+                <td><strong>고기동 강습형<br>(크림슨 블레이드 세트)</strong></td>
+                <td>
+                  <strong>· 외형 및 요구 출력</strong>: 적색·흑색 유선형 경량 장갑과 대형 고출력 부스터 (중~고출력 노심 요구)<br>
+                  <strong>· 주무장 &amp; 음성 기동 특성</strong>: 고열량 쌍곡검(Curved Blade) + 근거리 산탄 총기. <em>“타겟 측면으로 파고들어!”, “뒤로 돌아!”</em> 같은 회피·접근 명령 시 폭발적인 부스트 속도로 적의 사각을 찌르는 강습 특화 구성.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>⑤ 대표 파츠 세트 03</strong></td>
+                <td><strong>중장갑 화력형<br>(헤비 어설트 세트)</strong></td>
+                <td>
+                  <strong>· 외형 및 요구 출력</strong>: 밀리터리 카키·그레이 톤의 두꺼운 반응장갑과 대구경 포 (고출력 노심 필수 요구)<br>
+                  <strong>· 주무장 &amp; 음성 기동 특성</strong>: 대구경 개틀링 / 숄더 캐논 / 중장갑 실드. 이동은 묵직하지만 피격 경직을 무시하며 <em>“버티면서 정면 돌파해!”, “장애물 뒤에서 자리 잡아!”</em> 같은 진지 사수·화력 투사에 특화된 구성.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="faction-alien">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">08 / 적 세력 및 심층 세계관 설정 (Step C)</p>
+            <h2>외계 세력 (진명: 라 쿠엘루 퀠라) &amp; 감옥 행성 지구의 진실</h2>
+          </div>
+          <p class="section-desc">인게임 표면 서사에서는 ‘외계 세력’으로 통칭하며, 스토리 후반부까지 떡밥을 통해 점진적으로 진명 ‘라 쿠엘루 퀠라’와 감옥 리셋의 진실을 밝혀 나간다.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">세계관 반전 · 심층 서사 (점진적 떡밥 공개 구조)</p>
+          <h3>통칭: 외계 세력 <span class="muted" style="font-size:0.9rem;font-weight:normal">· 스토리 후반 공개 진명: ‘라 쿠엘루 퀠라 (La Quellu Quella)’</span></h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">일반 지칭: 외계 세력</span>
+            <span class="tag">진명: 라 쿠엘루 퀠라</span>
+            <span class="tag">지구 = 감정 에너지 추출 감옥</span>
+            <span class="tag">인간의 영혼 = 기체 형태의 노심</span>
+            <span class="tag">감옥 리셋 (수감자 청소 작전)</span>
+            <span class="tag">주인공과 파트너 노심 = 과거의 연인</span>
+          </div>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">심층 설정 축</th>
+                <th scope="col">핵심 개념</th>
+                <th scope="col">확정된 세계관 원리 및 서사 연출 방향</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 명칭 및 어원 구조</strong></td>
+                <td><strong>평시 지칭: ‘외계 세력’<br>진명: ‘라 쿠엘루 퀠라’<br>(4대 세력 통합의 뜻)</strong></td>
+                <td>
+                  <strong>· 명칭 운용 규칙</strong>: 인류는 침략자들의 정체를 알지 못하므로 평소에는 <strong>‘외계 세력’</strong>이라 지칭하며, 스토리 후반부에 진명 <strong>‘라 쿠엘루 퀠라 (La Quellu Quella)’</strong>가 밝혀진다.<br>
+                  <strong>· ‘라 쿠엘루 퀠라’의 외계어 어원 (4세력 통합사)</strong>: 과거 <strong>‘루(Lu)’, ‘쿠(Qu)’, ‘엘(El)’, ‘라(La)’ 4개의 세력(혈통)</strong>이 패권을 두고 싸웠고, 최종적으로 <strong>‘라(La)’ 세력에 의해 통합</strong>되었다.<br>
+                  <strong>· 음절별 외계어 의미</strong>: <strong>‘퀠(Quel)’은 외계어로 ‘통합’</strong>을 뜻한다. 즉 <strong>[라(La: 라에 의해 시작되어)] + [쿠·엘·루(Qu-El-Lu: 쿠와 엘과 루 세력이)] + [퀠·라(Quel-La: 라에 의해 통합되었다)]</strong>라는 역사적 통합 선언 자체가 문명의 이름이 된 것이다. 파트너 노심의 진명인 <strong>‘아캄 디오 루(Akam Dio Lu)’</strong>는 이 중 <strong>‘루(Lu)’ 세력(혈통)</strong> 출신임을 뜻한다.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 지구와 인간의 정체</strong></td>
+                <td><strong>감옥 행성 지구 &amp;<br>영혼(기체 형태 노심)</strong></td>
+                <td>
+                  <strong>· 감옥 행성 지구</strong>: 지구는 자연 발생한 인류의 모성이 아니라, <strong>‘라 쿠엘루 퀠라’에서 죄를 지은 자들을 가두어 둔 거대한 행성급 감옥</strong>이었다.<br>
+                  <strong>· 인간(영혼)의 실체</strong>: 인간들의 실체는 라 쿠엘루 퀠라의 죄수들이며, 지구라는 감옥 환경 속에서 <strong>‘영혼’이라 불리는 기체(Gas/Aura) 형태의 노심</strong>으로서 육체에 깃들어 살아가게 만든 것이다.<br>
+                  <strong>· 감정 에너지 수확</strong>: 라 쿠엘루 퀠라는 수감된 인간(기체 형태 노심)들이 지구에서 희로애락을 겪으며 <strong>활동할 때 뿜어내는 ‘감정’을 고순도 에너지로 변환해 뽑아내고 있었다.</strong>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>③ 침공의 진짜 이유</strong></td>
+                <td><strong>탈옥 사태 &amp; 정치적 문제로 인한<br>‘감옥 리셋 (수감자 제거)’</strong></td>
+                <td>
+                  <strong>· 왜 지금 침공했는가?</strong>: 최근 지구 감옥에서 <strong>기체 형태의 노심(영혼)들이 감옥 시스템을 벗어나 탈출하는 일</strong>이 빈번해졌고, 여기에 <strong>라 쿠엘루 퀠라 본국의 내부 정치적 문제</strong>가 맞물리면서 현 감옥 체제를 <strong>‘리셋(초기화)’</strong>하기로 결정했다.<br>
+                  <strong>· 왜 지구를 파괴하지 않고 78.5%만 점령했는가?</strong>: 지구를 <strong>앞으로도 계속 감정 에너지 수확용 감옥 시설로 재사용해야 하기 때문</strong>이다. 따라서 행성 자체를 파괴하는 대량살상무기 대신, 기동 병기들을 투입해 <strong>기존에 수감되어 있던 라 쿠엘루 퀠라의 범죄자(현 인류)들만 샅샅이 색출하여 제거(청소)</strong>하고 있다.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>④ 파트너 노심의 비밀</strong></td>
+                <td><strong>먼 과거의 연인 &amp;<br>언어 장벽의 아이러니</strong></td>
+                <td>
+                  <strong>· 왜 파트너 노심은 주인공만 돕는가?</strong>: 파트너 노심은 주인공의 내면(영혼 형태의 노심)을 보고, 그가 <strong>아주 먼 과거 라 쿠엘루 퀠라 시절 자신의 연인</strong>이었음을 단번에 알아보았다. 그래서 감옥 리셋 부대로부터 오직 연인(주인공)을 지키기 위해 TL1의 심장이 되어 싸우며, 주인공 외의 다른 인간 캐릭터들에게는 매우 적대적이다.<br>
+                  <strong>· 왜 이 진실을 말해 주지 못하는가?</strong>: 파트너 노심은 인간들의 언어를 대충 알아듣게 되었으나, <strong>인간들은 노심의 외계 전자음을 전혀 알아들을 수 없다.</strong> 이 비대칭 의사소통 구조 때문에 주인공과 인류는 노심이 왜 자신을 돕는지, 지구가 왜 침공받았는지 바로 알 수 없으며, 전투와 노심 전이를 거듭하며 조각난 단서(떡밥)로 진실에 다가서게 된다.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="enemy-hierarchy">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">09 / 적 개체 조형 원리 및 5단계 등급 체계 (Step D · 외계어 기준표)</p>
+            <h2>노심이 빚어낸 거대 생체 외형 &amp; 인류 분류 vs 외계 5계급 (로·쿠엘·루·퀠·라)</h2>
+          </div>
+          <p class="section-desc">어쩔 수 없이 기계 로봇(TL1)을 타는 인간과 달리, 외계 세력은 노심 자체의 힘으로 인간과 닮은 거대한 ‘생체 육체’를 구성한다. 이는 인간과 외계인이 원래 동일한 존재였다는 핵심 떡밥이 된다.</p>
+        </div>
+
+        <article class="panel" style="margin-bottom:18px">
+          <p class="eyebrow">적 개체 핵심 조형 원리 · 기계(인류) vs 생체+결정(외계 세력)</p>
+          <h3>“인간은 어쩔 수 없이 기계 로봇을 타지만, 외계 세력은 노심이 스스로 거대한 생체 육체를 구성한다”</h3>
+          <div class="tag-list" style="margin-bottom:18px">
+            <span class="tag">핵심 본질: 생체(Bio-Entity)</span>
+            <span class="tag">신비로운 결정체·기하학 아우라 결합</span>
+            <span class="tag">인간형 기본 실루엣 + 개체별 이형 특징</span>
+            <span class="tag">인류 분류: 일반 / 특수 / 정예 / 보스 / 네임드</span>
+            <span class="tag">외계 계급: 로 / 쿠엘 / 루 / 퀠 / 라</span>
+          </div>
+
+          <table class="role-table" style="margin-bottom:24px">
+            <thead>
+              <tr>
+                <th scope="col">설계 항목</th>
+                <th scope="col">핵심 특징</th>
+                <th scope="col">세계관 원리 및 서사 떡밥 연결</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>① 본체와 육체 구성</strong></td>
+                <td><strong>본체 = 노심(Core)<br>외형 = 노심이 구성한 거대 생체</strong></td>
+                <td>
+                  <strong>· 기계 로봇(인류)과의 대비</strong>: 죄수로서 지구에 갇힌 인간(기체 형태의 영혼 노심)은 본래의 육체 구성 능력을 잃어 어쩔 수 없이 강철 기계 로봇(<strong>TL1</strong>)을 만들어 탑승한다.<br>
+                  <strong>· 노심의 육체 구성 능력</strong>: 반면 <strong>라 쿠엘루 퀠라(외계 세력)</strong>는 그 본체 크기 자체는 노심이지만, 노심의 힘으로 <strong>거대한 ‘생체(살아있는 육체)’를 직접 구성</strong>하여 강림한다.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>② 시각적 디자인 톤</strong></td>
+                <td><strong>신비로운 기하학·결정체 느낌 +<br>인간형 생체 실루엣 + 고유 이형성</strong></td>
+                <td>
+                  <strong>· ‘인간과 동일했던 존재’라는 시각적 떡밥</strong>: 차갑고 신비로운 기하학·결정체 광휘(교도관/천사 같은 위압감)를 두르고 있으면서도, 근본적으로는 <strong>인간과 비슷한 외형(휴머노이드 생체 실루엣과 생체 질감)</strong>을 반드시 유지한다.<br>
+                  <strong>· 개체별 차별화</strong>: 기본 골격은 인간과 닮았으되, 각 개체나 등급마다 <strong>서로 아주 다른 고유한 생체·결정 특징</strong>(비대칭 생체 장갑, 결정화된 부유 기관, 다중 생체 팔, 기하학적 광륜 등)을 지닌다.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="eyebrow">적 개체 5단계 등급 기준표 (인류 관찰 분류 ↔ 외계 본래 계급 · 외계어 제작 기준)</p>
+          <h3 style="margin-bottom:12px">세력 진명 ‘라 쿠엘루 퀠라’와 직결되는 5대 계급 체계</h3>
+          <p class="muted" style="margin-bottom:16px">인게임 UI와 작전 브리핑에서는 인류가 그동안 관찰해 명명한 분류(<strong>일반 · 특수 · 정예 · 보스 · 네임드</strong>)를 사용하며, 외계 본래 등급(<strong>로 · 쿠엘 · 루 · 퀠 · 라</strong>)은 향후 제작할 외계어 대사·파장 해독 텍스트 등에서 떡밥식으로만 노출한다.</p>
+
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th scope="col">단계</th>
+                <th scope="col">인류 관찰 분류 (인게임 표기)</th>
+                <th scope="col">외계 본래 등급 (외계어 떡밥 기준)</th>
+                <th scope="col">전장 역할 · 생체/노심 특징 및 전리품</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1단계 (최하위)</strong></td>
+                <td><strong>일반 (Normal)</strong></td>
+                <td><strong>로 (Ro)</strong></td>
+                <td>
+                  <strong>· 역할</strong>: 감옥 행성 전역에 투입되는 기본 생체 병기. 인간과 유사한 기본 생체 실루엣을 지니며 무리 지어 감정 파장을 추적한다.<br>
+                  <strong>· 전투 및 보상</strong>: 에임 타겟 전환 및 기본 음성 이동 숙달용 대상. 처치 시 기초 생체·결정 소재 노획.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>2단계 (하~중위)</strong></td>
+                <td><strong>특수 (Special)</strong></td>
+                <td><strong>쿠엘 (Quel)</strong></td>
+                <td>
+                  <strong>· 역할</strong>: 원거리 생체 포격, 고속 기습, 구속장 전개 등 한 가지 특화된 변이 생체 기관을 지닌 특수 개체.<br>
+                  <strong>· 전투 및 보상</strong>: 플레이어가 음성 명령으로 엄폐하거나 측면을 파고들도록 유도. 특수 외계 생체·결정 파츠 소재 및 저~중출력 노심 노획.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>3단계 (중상위)</strong></td>
+                <td><strong>정예 (Elite)</strong></td>
+                <td><strong>루 (Lu)</strong></td>
+                <td>
+                  <strong>· 역할</strong>: 고도로 발달한 생체 외피와 결정 기관을 두른 상급 집행 개체. <strong>RoBERTa 문맥 임베딩 기반 적 AI</strong>가 플레이어의 전투 성향과 거리를 읽고 지능적으로 대응한다.<br>
+                  <strong>· 전투 및 보상</strong>: 연속 음성 명령과 칭찬·비난 평가 루프가 가장 치열하게 작동하는 상대. 중~고출력 노심 그릇 및 상급 소재 노획.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>4단계 (상위 지휘)</strong></td>
+                <td><strong>보스 (Boss)</strong></td>
+                <td><strong>퀠 (Quel / Kwel)</strong></td>
+                <td>
+                  <strong>· 역할</strong>: 구역 단위 감옥 리셋을 지휘하는 거대 생체 지휘관 개체. 인간형 생체 실루엣 위에 압도적인 기하학 결정 광륜과 거대 생체 무장을 구현한다.<br>
+                  <strong>· 전투 및 보상</strong>: 부위 파괴와 정교한 음성 회피·돌파 기동이 요구되는 스테이지 보스. 파트너 노심의 외형 진화를 이끄는 <strong>고출력 상위 노심 그릇</strong> 노획.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>5단계 (최상위 / 최종)</strong></td>
+                <td><strong>네임드 (Named / 최종 보스)</strong></td>
+                <td><strong>라 (La)</strong></td>
+                <td>
+                  <strong>· 역할</strong>: ‘라 쿠엘루 퀠라’의 정점에 선 고유 인격체이자 감옥 리셋 총괄자(최종 보스급). 가장 완벽하고 신성한 생체 외형과 결정 권능을 지닌다.<br>
+                  <strong>· 서사 및 떡밥</strong>: 세력 진명 <strong>‘라 쿠엘루 퀠라 (La - Quel - Lu - Quel - La)’</strong>의 가장 높은 음절인 <strong>‘라(La)’</strong> 계급으로, 주인공과 파트너 노심의 과거 인연 및 감옥 행성의 모든 진실과 직결되는 핵심 존재.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <span>TEAM 휴머트로닉 · 로봇대전 캐릭터 설정 기획서</span>
+      <span><a href="로봇대전_기획서.html">← 메인 허브로 돌아가기</a></span>
+    </div>
+  </footer>
+</body>
+</html>

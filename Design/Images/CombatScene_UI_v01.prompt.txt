@@ -1,0 +1,14 @@
+Use case: ui-mockup
+Asset type: landscape 16:9 Korean robot combat game's battle mode example screenshot, integrated playable-looking UI.
+Input images: Image 1 (lobby) reference for dark UI panels, restrained purple trim and large clear Korean typography; Image 2 reference for player's white armored slender mech, cranial cockpit, exposed joints and purple core lighting.
+Primary request: Show the game's signature combination: player aims and attacks with a fixed central crosshair, while robot moves in response to spoken instructions. This is an active combat gameplay screen, no large menu cards.
+Scene: giant mechs fighting across an invaded Earth's ruined city toward an alien enemy base. Enemy combat mech in mid-distance directly around central aim, hostile base farther behind. Dynamic battlefield smoke, rubble and restrained weapon fire without hiding target. Low over-the-shoulder camera: player reference mech's shoulder, forearm and partial back at lower left only, its weapon pointing toward the central target. Gameplay view occupies most of screen. Use real-scale high-end Unreal-style rendering.
+UI composition:
+Top left compact heading exactly "전투모드"; below a small objective panel "임무: 적 기지 파괴".
+Center perfectly centered crisp fine crosshair, red targeting brackets around enemy and small label "목표 적". Maintain an unobstructed center view; no editor path gizmos or training grid.
+Bottom left two thin readable status bars labelled "내구도" and "에너지", no numeric percentages.
+Bottom center small voice/action panel with microphone and recognized speech exactly "적에게 접근해"; below exactly "선택 액션: 접근" and "접근 중". This panel clearly associates the spoken command with the movement being executed. Do not show movement joystick or directional control buttons.
+Bottom right compact weapon box exact labels "주 무기" and "사용 가능". Beneath it a discreet voice feedback status "음성 평가 기록" and "종료 시 반영". This is passive status, no praise/criticism buttons.
+Top right small pause icon.
+Style: restrained transparent HUD around screen edges, cinematic realistic battlefield, white readable Korean text on dark backing, purple player UI and red hostile target accents, consistent art direction with previous screens.
+Constraints: exact Korean labels, avoid extra English, invented numeric damage or stats, currency or leveling popups, giant menu tiles, chat window, browser/device chrome. No on-screen training tools or save/register buttons. Growth and changes apply after stage completion, no immediate stat gain. This is a concept screen; no claims of actual implementation. Full opaque background.

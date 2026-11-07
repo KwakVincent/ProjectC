@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>로봇대전 | TEAM 휴머트로닉 — 씬: 타이틀 · 로비 · 노심</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="로봇대전_기획서.html"><span class="brand-mark" aria-hidden="true">H</span> 로봇대전 <span class="muted">/ TEAM 휴머트로닉</span></a>
+      <nav aria-label="문서 목차">
+        <a href="로봇대전_기획서.html">메인 · 전체 흐름</a>
+        <a class="active" href="Scene_Title_Lobby.html">씬: 타이틀·로비·노심</a>
+        <a href="Scene_Shop.html">씬: 상점</a>
+        <a href="Scene_Training.html">씬: 훈련소</a>
+        <a href="Scene_Combat_Quest.html">씬: 퀘스트·전투·결과</a>
+        <a href="Feature_Control_Targeting.html">기능: 조작·타겟·이동AI</a>
+        <a href="Feature_Voice_Evaluation.html">기능: 음성·평가·성장</a>
+        <a href="Feature_Character_Setting.html">캐릭터 설정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="scene-title-lobby">
+      <div class="shell">
+        <div class="section-head">
+          <div><p class="eyebrow">SCENE 01–02 / 타이틀 · 로비 · 기지 격납고</p><h2>계정을 연결하고, 기지에서 로봇을 정비한다</h2></div>
+          <p class="section-desc">타이틀 씬에서 로그인 또는 터치로 진입하며, 로비(기지 격납고)는 장비·노심 교체와 노심 수집 및 세 가지 활동 분기를 담당한다.</p>
+        </div>
+
+        <div class="scene-examples">
+          <article class="scene-example" id="scene-title">
+            <p class="eyebrow">화면 01 / 타이틀 씬 &amp; 최초 진입 튜토리얼 분기</p><h3>계정을 확인하고, 최초 접속 시 가벼운 전투 튜토리얼을 거친다</h3>
+            <figure><a href="Images/TitleScene_UI_v01.png" target="_blank" rel="noopener"><img src="Images/TitleScene_UI_v01.png" alt="로봇과 침공당한 지구를 배경으로 게임 제목과 시작, 로그인, 설정, 종료 버튼을 배치한 타이틀 씬 시안" loading="lazy" width="1672" height="941"></a><figcaption>기능: 기존 계정 로그인 버튼도 함께 두되, 자동 로그인된 계정이 없는 상태에서 시작하면 게스트 계정을 자동 생성해 로그인한다. 로그인 완료 후 해당 계정의 최초 접속 여부를 확인하여, 최초 접속(Y)이면 기본 이동 액션 프리셋이 탑재된 ‘가벼운 전투 튜토리얼 씬’으로 이동하고, 기존 접속 이력(N)이 있으면 즉시 ‘로비 · 기지’로 진입한다.</figcaption></figure>
+            <div class="core-stages" style="margin-top:18px" aria-label="타이틀 씬 및 온보딩 진입 순서">
+              <div><span>01 / 계정 확인</span><strong>자동 로그인 확인 (기존 계정 연동 지원)</strong></div>
+              <div><span>02 / 게스트 생성</span><strong>미연동 시작 시 게스트 계정 생성 후 로그인</strong></div>
+              <div><span>03 / 최초 접속 확인</span><strong>Y: 가벼운 전투 튜토리얼 / N: 로비 직행</strong></div>
+              <div><span>04 / 튜토리얼 전투</span><strong>기본 이동 프리셋 탑재 상태로 실전 조작·음성 체험 후 로비 진입</strong></div>
+            </div>
+            <p class="scene-note">신규 유저는 훈련소에서 직접 만든 액션이 아직 없으므로, 기본 이동 액션 프리셋이 노심에 기본 탑재된 상태로 가벼운 전투 튜토리얼에 진입해 음성 활동 감지(Voice Activity Detection, VAD) 발화 명령과 조준 공격, 칭찬·비난 평가를 자연스럽게 익힌다.</p>
+            <div class="scene-links"><a href="#scene-lobby">다음 화면: 로비 · 기지 →</a></div>
+          </article>
+
+          <article class="scene-example" id="scene-lobby">
+            <p class="eyebrow">화면 02 / 로비 · 기지 격납고</p><h3>내 로봇을 정비·확인하고 다음 활동을 고른다</h3>
+            <figure><a href="Images/LobbyScene_UI_v01.png" target="_blank" rel="noopener"><img src="Images/LobbyScene_UI_v01.png" alt="격납고의 로봇과 훈련모드, 전투모드, 상점 진입 버튼, 장착 노심, 등록 액션, 보유 재화 정보를 배치한 로비 시안" loading="lazy" width="1672" height="941"></a><figcaption>기능: 훈련모드·전투모드·상점으로 진입하고, 내 로봇의 장착 노심·등록 액션과 보유 재화를 확인한다. 보유한 장비(파츠·무기·방어구·보조장치)와 노심의 장착·교체는 기지 격납고(로비)에서 수행하며, 교체 후 남은 구형 노심은 트로피처럼 수집·보관한다(격납고 내부 세부 화면 흐름은 앞단 씬부터 완성하며 추후 확정).</figcaption></figure>
+            <div class="scene-links">
+              <a href="Scene_Training.html">훈련모드 → 훈련소 기획</a>
+              <a href="Scene_Combat_Quest.html">전투모드 → 퀘스트·전투 기획</a>
+              <a href="Scene_Shop.html">상점 → 상점 기획</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="core-system">
+      <div class="shell">
+        <div class="section-head">
+          <div><p class="eyebrow">CORE SYSTEM / 외계 노심 전이 및 수집</p><h2>더 강한 노심에 모든 훈련을 전이하고, 남은 노심은 기지에 수집한다</h2></div>
+          <p class="section-desc">노심 교체는 누적한 성장의 초기화가 아니라 데이터 전이를 통한 성능 향상이다.</p>
+        </div>
+        <div class="core-path">
+          <p class="eyebrow">노심 성장 흐름 &amp; 파트너 노심 마스코트</p>
+          <h3>단일 파트너 자아 전이(외형 진화)와 구형 노심 트로피 수집</h3>
+          <p>외계 노심은 빛나는 구체·결정체에 작은 부유형 날개·귀·표정 파츠가 달린 정령형 메카 마스코트(인류 호칭: <strong>별똥이</strong> / 외계 진명: <strong>아캄 디오 루</strong>)로 표현된다. 노심은 인간의 말을 대충 알아듣게 되었지만 인간은 노심의 외계 전자음을 알아듣지 못하며, 도도하고 자존심이 강한 성격을 지녔다. 외계 개체에서 더 높은 출력의 새 노심을 얻어 소통·해금한 뒤 기지 격납고에서 교체 장착하면, <strong>파트너 노심 ‘별똥이(아캄 디오 루)’의 ‘자아와 기억(및 등록 액션·명령어·훈련 결과)’이 새 노심(그릇)으로 통째로 이사(전이)</strong>한다. 인격과 유대는 그대로 유지되면서 마스코트 외형이 진화하며, 자아가 빠져나간 구형 노심 껍데기는 기지에 트로피처럼 수집·전시한다.</p>
+          <div class="core-stages">
+            <div><span>01</span><strong>외계 로봇·기계에서 상위 노심 획득</strong></div>
+            <div><span>02</span><strong>새 노심과 소통·해금(시스템 추후 결정)</strong></div>
+            <div><span>03</span><strong>파트너 노심의 자아·기억·훈련 전이 및 외형 진화</strong></div>
+            <div><span>04</span><strong>남은 구형 노심 껍데기는 기지에 트로피로 수집</strong></div>
+          </div>
+        </div>
+        <table class="role-table" style="margin-top:24px">
+          <thead><tr><th scope="col">역할</th><th scope="col">기능</th><th scope="col">확정된 범위</th></tr></thead>
+          <tbody>
+            <tr><td>타이틀 씬 &amp; 튜토리얼</td><td>자동 로그인 계정이 없으면 게스트 계정을 생성해 로그인(기존 계정 연동 버튼 병행)하고, 최초 접속 여부를 확인해 분기한다.</td><td>최초 접속(Y) 시 기본 이동 액션 프리셋을 탑재해 ‘가벼운 전투 튜토리얼’로 진입한 뒤 로비로 가고, 기존 접속(N) 시 바로 로비로 진입한다.</td></tr>
+            <tr><td>로비 · 기지 격납고</td><td>상점·훈련소·퀘스트로 갈 수 있는 중심 공간이며, 보유 장비와 노심의 장착·교체를 수행한다.</td><td>씬 이름은 ‘로비’, 게임 속 장소는 ‘기지(격납고)’이며 교체 후 남은 노심을 트로피처럼 수집·보관한다(격납고 내부 세부 흐름은 앞단 완성 후 추후 결정).</td></tr>
+            <tr><td>외계 노심 (별똥이 / 진명: 아캄 디오 루)</td><td>구체·결정 슬라임/정령형 마스코트로 로봇에 에너지를 공급하며, 인간 언어 대신 외계 전자음과 도도하고 자존심 강한 바디랭귀지로 반응한다.</td><td>새 노심 장착 시 기존 파트너 노심의 자아·기억·훈련 결과가 통째로 전이되어 외형이 진화하며, 남은 구형 노심은 기지에 트로피로 남긴다.</td></tr>
+            <tr><td>천재 기술자 (을지 원)</td><td>전통 한국인 부모(프로그래머 아버지·기계공 어머니) 밑에서 자란 젊은 여성 수석 엔지니어(곱슬기 있는 아주 짙은 흑단발·청록빛 기계 의안·오른팔 기계 의수)다.</td><td>최초 접속 시 가벼운 전투 튜토리얼 가이드, 기지 격납고(TL1 파츠·노심 교체 및 데이터 전이), 훈련소 안내를 전담한다(퀘스트·상점은 분리).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><span>로봇대전 · 씬 기획서 (타이틀 · 로비 · 노심)</span><a href="로봇대전_기획서.html">← 메인 허브로 돌아가기</a></div></footer>
+</body>
+</html>

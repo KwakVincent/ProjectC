@@ -1,0 +1,12 @@
+Use case: ui-mockup
+Asset type: landscape 16:9 Korean robot combat game's quest selection screen, playable-looking integrated UI.
+Input image: approved lobby screen is a style reference only. Match the resistance-base industrial setting, charcoal translucent panels, restrained purple active-state borders, crisp Korean type, realistic Unreal-style lighting.
+Primary request: Show the step between lobby and actual combat: choose a mission from a list and tactical region map, inspect its objective, difficulty and expected rewards, then launch.
+Composition: three clear regions. Left mission list, large central tactical map occupying about 45 percent of the screen, right selected mission details and primary deploy button. Background is quiet command room within the base, not active battlefield. No large robot foreground blocking the map.
+Exact Korean text:
+Top left title "퀘스트 선택"; top right small navigation "기지로 돌아가기".
+Left heading "임무 목록"; three selectable mission cards exactly "적 기지 침공", "아군 기지 방어", "적 물자 약탈전". Highlight "적 기지 침공" purple; use a thumbnail and clear readable title for each. No invented location names, numbered mission IDs or star difficulty.
+Center heading "전투 지역"; a realistically detailed fictional local terrain and ruined-city tactical map on dark holographic planning surface, three distinct mission pins. Selected enemy-base pin has purple selection ring and red enemy-base marker; selected mission pin visually matches selected list card. Include a small allied base marker in neutral white. Do not imply routes between pins are mandatory sequential missions. No real-world geographic names or global occupation percentages.
+Right heading "선택 임무"; selected title "적 기지 침공"; section "임무 목표" with text "적 기지 파괴"; section "난이도" with neutral dash, section "예상 보상" showing three clean rows "명예", "공훈", "재화", each with neutral dash value. Large highlighted button exactly "출격" at bottom right.
+Style: high-end practical science fiction tactical game UI. Large legible Korean labels, clear hierarchy and generous aligned spacing. Purple selection accents consistent with approved lobby; red hostile location markers only on map. Map background remains readable.
+Constraints: this is pre-battle choice and deployment, no attack crosshair, health bars, training tools, shopping UI or reward claim buttons. No invented currency, numerical reward amounts, level requirements or mission unlock rules. No guaranteed core reward. Do not add slogan, English labels or device/browser frame. Full-screen opaque concept screenshot.

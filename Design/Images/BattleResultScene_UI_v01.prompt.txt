@@ -1,0 +1,13 @@
+Use case: ui-mockup
+Asset type: landscape 16:9 Korean robot combat game's post-battle results screen.
+Input images: Image 1 is combat screenshot, continuity reference for ruined city/enemy-base mission and charcoal-purple UI. Image 2 is character reference for same white slender armored mech, cranial cockpit, exposed joints and purple core. Do not change player's mech identity.
+Primary request: Clearly show what the player earned and how recorded spoken evaluations were applied at the END of the stage, then return to base. One successful mission example, not an active fight.
+Composition: top title and success banner, quiet post-battle cinematic background with player's mech at center rear and ruined defeated base in haze. Lower and middle foreground clean dark translucent results panels, three main readable sections. No crosshair, targeting brackets, health/combat HUD or shopping controls.
+Exact Korean text:
+Top left "전투 결과"; prominent top center "임무 성공"; subtitle "적 기지 침공".
+Left panel heading "획득 보상"; clean rows "명예", "공훈", "재화", each neutral dash value. Below separate heading "노획품" with two small thumbnails exactly "노획 물자" and "노심"; no counts, rarity or guarantee labels.
+Center panel heading "음성 평가 반영"; one clear example record: "명령" then "적에게 접근해", "발동 액션" then "접근", "평가" then "칭찬". A clear status "반영 완료", and small explanation "다음 선택에 반영". This associates an evaluation with a particular prior command and executed action. No praise/criticism input buttons.
+Right panel heading "성장 변화"; columns "전투 전" and "반영 후", rows "적합성", "레벨", "유대", all values neutral dashes. No invented numeric gains, guaranteed level-up animations, filled growth bars or plus arrows.
+Bottom right large primary navigation button exactly "기지로 복귀".
+Style: professional restrained realistic science fiction game results interface, cinematic quieter mood after combat, crisp exact Korean and strong hierarchy, readable panels with purple highlights matching prior screens, good aligned spacing. Robotic silhouette stays visible behind panels without competing with information.
+Constraints: reward amounts and growth rules unfinalized, so no numbers or invented currency. Loot visuals are illustrative possible captured items, not drop guarantees. Evaluation applied on stage end, no RL/neural training claims. No auto-sale, auto-core replacement, retry or new quest buttons. No English/slogan/browser/device frame. Full opaque game screen.

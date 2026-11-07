@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>로봇대전 | TEAM 휴머트로닉 — 씬: 상점</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="로봇대전_기획서.html"><span class="brand-mark" aria-hidden="true">H</span> 로봇대전 <span class="muted">/ TEAM 휴머트로닉</span></a>
+      <nav aria-label="문서 목차">
+        <a href="로봇대전_기획서.html">메인 · 전체 흐름</a>
+        <a href="Scene_Title_Lobby.html">씬: 타이틀·로비·노심</a>
+        <a class="active" href="Scene_Shop.html">씬: 상점</a>
+        <a href="Scene_Training.html">씬: 훈련소</a>
+        <a href="Scene_Combat_Quest.html">씬: 퀘스트·전투·결과</a>
+        <a href="Feature_Control_Targeting.html">기능: 조작·타겟·이동AI</a>
+        <a href="Feature_Voice_Evaluation.html">기능: 음성·평가·성장</a>
+        <a href="Feature_Character_Setting.html">캐릭터 설정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="shop">
+      <div class="shell">
+        <div class="section-head">
+          <div><p class="eyebrow">SCENE 03 / 상점</p><h2>장비를 구매하고 노획 물자를 판다</h2></div>
+          <p class="section-desc">기지의 상점에서는 로봇을 이루는 장비와 유틸리티 물품을 사고파는 거래를 담당하며, 보유 장비의 장착·교체는 기지 격납고에서 수행한다.</p>
+        </div>
+
+        <article class="scene-example" id="scene-shop" style="margin-bottom:28px">
+          <p class="eyebrow">화면 예제 / 상점 씬</p><h3>장비를 비교해 구매하고, 노획 물자를 판매한다</h3>
+          <figure><a href="Images/ShopScene_UI_v01.png" target="_blank" rel="noopener"><img src="Images/ShopScene_UI_v01.png" alt="파츠, 무기, 방어구, 보조장치 분류와 상품 목록, 로봇 장비 미리보기, 현재 장비와 선택 장비의 성능 비교, 구매 및 노획품 판매 영역이 있는 상점 시안" loading="lazy"></a><figcaption>기능: 품목 분류에서 상품을 고르고, 로봇에 적용한 모습과 현재 장비·선택 장비의 차이를 비교해 구매한다. 전투에서 노획한 적의 물자는 별도 판매 영역에서 판매한다. 고성능 무기·파츠일수록 요구하는 에너지 소모와 중량이 크며, 더 높은 출력의 노심으로 교체할수록 고성능 장비를 원활하게 운용할 수 있다. 보유 장비의 실제 장착·교체는 기지 격납고(로비)에서 수행한다.</figcaption></figure>
+          <div class="core-stages" style="margin-top:18px" aria-label="상점의 선택과 거래 순서">
+            <div><span>01 / 상품 선택</span><strong>품목 분류에서 장비를 고른다</strong></div>
+            <div><span>02 / 비교</span><strong>외형과 공격력·에너지 소모·중량 차이를 확인한다</strong></div>
+            <div><span>03 / 구매</span><strong>가격과 보유 재화를 확인해 구매한다</strong></div>
+            <div><span>04 / 노획 물자 판매</span><strong>전투에서 노획한 적의 물자를 판매한다</strong></div>
+          </div>
+          <p class="scene-note">진입·복귀 흐름: 로비 · 기지 → 상점 → 로비 · 기지. 상점은 구매와 노획 물자 판매 거래를 담당하고, 보유 장비 장착·교체는 로비(격납고)에서 수행한다. 노심은 로봇 교체 및 기지 트로피 수집을 기본으로 하며, 중복 획득한 노심의 판매·처리는 추후 결정한다.</p>
+        </article>
+
+        <div class="shop-grid" aria-label="상점 거래 품목 (TL1 코어 1슬롯 + 파츠 5슬롯 대응)">
+          <article class="shop-card"><span>01 / HEAD &amp; BODY</span><h3>헤드 센서 · 코어 아머</h3></article>
+          <article class="shop-card"><span>02 / ARMS &amp; WEAPONS</span><h3>암 마운트 · 주무장</h3></article>
+          <article class="shop-card"><span>03 / LEGS &amp; CHASSIS</span><h3>레그 · 하체 구동부</h3></article>
+          <article class="shop-card"><span>04 / BACKPACK &amp; SUPPORT</span><h3>백팩 부스터 · 보조장치</h3></article>
+        </div>
+
+        <div class="shop-sell">
+          <div><p class="eyebrow">전투에서 기지로 · 단일 기체 프레임 TL1 개조</p><h3>노획 물자 판매 및 TL1 (The Last 1) 파츠·노심 출력 연동</h3></div>
+          <p>주인공의 전용 단일 기체 프레임 <strong>TL1 (The Last 1 — 인류의 마지막 희망)</strong>은 <strong>코어 1슬롯 + 외장 파츠 5슬롯(헤드·코어 아머·암/주무장·레그·백팩)</strong> 구조로 조립·개조된다. 파츠 세트 조합에 따라 <strong>① 표준 밸런스형(프로토타입/랜서)</strong>, <strong>② 고기동 강습형(크림슨 블레이드)</strong>, <strong>③ 중장갑 화력형(헤비 어설트)</strong> 등으로 외형과 전투 병과가 탈바꿈한다. 고성능 파츠일수록 에너지 소모와 중량이 크며, 고출력 노심으로 교체할수록 이러한 고성능 장비를 원활하게 운용할 수 있다.</p>
+        </div>
+
+        <table class="role-table" style="margin-top:24px">
+          <thead><tr><th scope="col">역할 / 항목</th><th scope="col">기능 및 규칙</th><th scope="col">확정된 범위</th></tr></thead>
+          <tbody>
+            <tr><td>장비 비교 및 구매</td><td>파츠·무기·방어구·보조장치 분류별 외형 미리보기와 공격력·에너지 소모·중량 비교를 제공한다.</td><td>구매 거래만 담당하며 실제 장착·교체는 기지 격납고(로비)에서 수행한다.</td></tr>
+            <tr><td>노심 출력과 장비 연동</td><td>고성능 장비일수록 높은 에너지 소모와 중량을 요구한다.</td><td>상위 고출력 노심으로 교체할수록 고성능·고중량 장비를 원활하게 운용할 수 있다(세부 수치 추후 결정).</td></tr>
+            <tr><td>노획 물자 판매</td><td>전투에서 획득한 적의 물자를 판매해 재화를 얻는다.</td><td>노심은 교체 및 기지 트로피 수집이 기본이며, 중복 획득 노심 처리는 추후 결정한다.</td></tr>
+            <tr><td>상점 보급관 (아람 드 몽샤랭 / 코드네임: 브로커)</td><td>한국인 어머니와 프랑스인 아버지 사이에서 태어난 프랑스 국적의 보급관으로, 거대 군수 기업의 비자금·무기 창고를 빼돌려 저항군 상점을 운영한다(금발+흑발 투톤 포니테일·금빛 눈동자·정장+방탄 앞치마·어깨 감정 드론).</td><td>극존칭 만담형 화법(“~하셨습니까, 호구... 아니 고객님!”)으로 장비 비교·구매와 노획 물자 감정·매입을 전담하며, 수석 엔지니어 ‘을지 원’과는 예산 문제로 티격태격하는 앙숙이자 절친이다.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="scene-links">
+          <a href="Scene_Title_Lobby.html">← 로비 · 기지 격납고 기획으로</a>
+          <a href="Feature_Character_Setting.html#char-broker">상점 보급관 캐릭터 상세 설정 보기 →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><span>로봇대전 · 씬 기획서 (상점)</span><a href="로봇대전_기획서.html">← 메인 허브로 돌아가기</a></div></footer>
+</body>
+</html>

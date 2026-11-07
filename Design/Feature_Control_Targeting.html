@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로봇대전 기획서 | TEAM 휴머트로닉 — 기능: 조작 · 에임 타겟 · 이동 AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="로봇대전_기획서.html"><span class="brand-mark" aria-hidden="true">H</span> 로봇대전 <span class="muted">/ TEAM 휴머트로닉</span></a>
+      <nav aria-label="기획서 문서 이동">
+        <a href="로봇대전_기획서.html">메인 · 전체 흐름</a>
+        <a href="Scene_Title_Lobby.html">씬: 타이틀·로비·노심</a>
+        <a href="Scene_Shop.html">씬: 상점</a>
+        <a href="Scene_Training.html">씬: 훈련소</a>
+        <a href="Scene_Combat_Quest.html">씬: 퀘스트·전투·결과</a>
+        <a href="Feature_Control_Targeting.html" aria-current="page">기능: 조작·타겟·이동AI</a>
+        <a href="Feature_Voice_Evaluation.html">기능: 음성·평가·성장</a>
+        <a href="Feature_Character_Setting.html">캐릭터 설정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="concept">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">01 / 조작 원칙</p>
+            <h2>조작의 역할을 나눈다</h2>
+          </div>
+          <p class="section-desc">공격의 순간은 플레이어가 결정하고, 위치를 바꾸는 과정은 음성 명령을 받은 로봇 인공지능(Artificial Intelligence, AI)이 수행한다.</p>
+        </div>
+
+        <div class="split">
+          <article class="control-card">
+            <span class="card-index">PLAYER CONTROL · PILOT</span>
+            <h3>플레이어(직접 탑승 파일럿) · 공격</h3>
+            <p>천재 기술자와 함께 최초의 외계 노심과 첫 교감에 성공한 실전 테스트 파일럿(헬멧·슈트 기반 코드네임 파일럿)으로 로봇에 직접 탑승한다. 화면 중앙의 에임으로 대상을 겨냥하고 타겟팅해 직접 공격하는 하프액션 방식이며, 기체 내부 통신으로 노심에게 이동을 말로 지시한다. 마우스와 키보드가 주 입력 장치이며 게임패드와 머리 착용형 디스플레이(Head-Mounted Display, HMD)도 지원할 예정이다.</p>
+          </article>
+          <article class="control-card ai">
+            <span class="card-index">ROBOT CONTROL</span>
+            <h3>로봇 AI · 이동</h3>
+            <p>선택된 명령을 실제 이동으로 바꾼다. 전진·후진·좌·우 사방향 이동은 카메라 시야의 수평 방향을 실시간으로 추적하며, 이동 도중 플레이어가 새로 발화한 명령이 인식되면 진행 중이던 이동과 남은 연속 명령 대기열을 즉시 취소(Interrupt)하고 새 명령을 최우선으로 덮어써서 실행한다.</p>
+          </article>
+        </div>
+
+        <div class="input-grid" aria-label="공격 조작 장치 계획">
+          <article class="input-card"><span>MAIN</span><h3>마우스 + 키보드</h3></article>
+          <article class="input-card"><span>SUPPORT</span><h3>게임패드</h3></article>
+          <article class="input-card"><span>LATER</span><h3>머리 착용형 디스플레이</h3></article>
+        </div>
+
+        <div class="command-row">
+          <strong>음성 명령 예시</strong>
+          <span class="quote">“앞으로 가”</span>
+          <span class="quote">“타겟의 정면 3m로 가”</span>
+          <span class="quote">“도망가!”</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="targeting-rules">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">02 / 에임 타겟 및 이동 AI 규칙</p>
+            <h2>에임 타겟 대원칙과 이원화 록온(LockOn)</h2>
+          </div>
+          <p class="section-desc">훈련소와 실전 전투 모두 카메라 에임에 포착된 대상을 기준으로 삼으며, 적과 일반 오브젝트의 고정 방식을 구분한다.</p>
+        </div>
+
+        <div class="rule-grid">
+          <article class="panel">
+            <p class="eyebrow">타겟팅 규칙 01</p>
+            <h3>적 자동 록온 및 타겟 전환</h3>
+            <p class="muted">에임에 타겟팅된 적은 카메라 시야(화면)에서 완전히 벗어나기 전까지 자동으로 록온(대상 고정)된다. 시야를 완전히 다른 곳으로 돌려 적이 화면 밖으로 벗어나면 해제된다. 화면 안에 여러 적이 있을 때 에임 중심으로 다른 적을 직접 가리키면 새 적으로 타겟을 즉시 바꾸며, 록온 버튼을 누르고 있는 동안(Hold)에만 다른 적을 스쳐도 기존 적을 강제 유지한다.</p>
+          </article>
+          <article class="panel">
+            <p class="eyebrow">타겟팅 규칙 02</p>
+            <h3>일반 오브젝트 홀드 록온 및 상대 탐색</h3>
+            <p class="muted">장애물·도로 등 일반 오브젝트는 록온 버튼을 누르고 있을 때(Hold)에만 고정하고, 버튼을 누르지 않은 상태에서는 에임 밖으로 나가면 즉각 해제한다. ‘타겟 오른쪽 도로’, ‘타겟 왼쪽 장애물’ 같은 주변 탐색과 장애물의 앞·뒤·좌·우는 플레이어(카메라)가 타겟을 바라보는 시선 방향을 기준으로 계산해 가장 가까운 해당 오브젝트를 선택한다.</p>
+          </article>
+        </div>
+
+        <div class="rule-grid" style="margin-top:18px">
+          <article class="panel">
+            <p class="eyebrow">이동 AI 규칙 01</p>
+            <h3>실시간 시야 추적 및 새 명령 덮어쓰기</h3>
+            <p class="muted">전·후·좌·우 단위 이동은 이동 중에도 카메라 시야의 수평 방향을 실시간으로 추적한다. 이동 중 새로 발화한 음성 명령이 들어오면 진행 중이던 이동과 남은 연속 명령 대기열을 즉시 취소(Interrupt)하고 새 명령을 실행한다.</p>
+          </article>
+          <article class="panel">
+            <p class="eyebrow">이동 AI 규칙 02</p>
+            <h3>타겟 소실 유지 및 이동 불가 지점 자동 보정</h3>
+            <p class="muted">이동 중 타겟이 화면 밖으로 나가 록온이 해제되어도 마지막으로 계산한 목표 위치까지 이동을 완료한다. 계산된 목표 위치가 장애물 내부이거나 이동 불가 구역(내비게이션 메시 외부)일 경우, 해당 목표 지점에서 가장 가까운 이동 가능 위치로 자동 보정하여 이동한다.</p>
+          </article>
+        </div>
+
+        <div class="scene-links">
+          <a href="Scene_Training.html#training-description">훈련소 음성 설명·타겟 규칙 보기 →</a>
+          <a href="Scene_Combat_Quest.html#scene-combat">전투모드 화면 예제 보기 →</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="target">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">03 / 현재 코드 기준</p>
+            <h2>“적에게 접근해”의 대상 탐색 코드</h2>
+          </div>
+          <p class="section-desc">적이 여러 명일 때 현재 코드에 구현된 후보 필터와 점수 규칙을 기록한다.</p>
+        </div>
+
+        <p class="parallel-note">확정한 기획에서는 모든 액션의 기준 대상이 카메라 에임에 타겟팅된 대상(‘타겟’)이다. 적은 시야에서 완전히 벗어나기 전까지 자동 록온(다른 적 직접 조준 시 전환)되며, 일반 오브젝트는 록온 버튼을 누르고 있을 때만 고정되고 에임 밖으로 나가면 즉각 해제된다. 이동 중 타겟을 잃으면 마지막으로 계산한 목표 위치까지 이동한다. 아래 후보 필터·점수 규칙은 기존 코드의 참고 내용이며, 훈련 액션의 실전 대상 연결 규칙과 구현 상태를 구분한다.</p>
+
+        <div class="rule-grid">
+          <article class="panel">
+            <h3>먼저 후보를 거른다</h3>
+            <ol class="rule-list">
+              <li>적 태그가 있거나 피해 가능 인터페이스를 구현한 액터</li>
+              <li>화면 안에 보이고 로봇과의 거리가 감지 범위 이내인 적</li>
+              <li>카메라와 적 사이의 시야가 가려지지 않은 적</li>
+            </ol>
+          </article>
+          <article class="panel">
+            <h3>그다음 최적의 적을 고른다</h3>
+            <p class="muted">화면 중심과의 거리와 로봇과의 거리를 합쳐 점수를 계산한다. 점수가 가장 낮은 적이 목표가 된다.</p>
+            <div class="score" aria-label="화면 중심 거리 70퍼센트, 로봇 거리 30퍼센트"><span></span></div>
+            <div class="score-labels"><span>화면 중심 거리 70%</span><span>로봇 거리 30%</span></div>
+          </article>
+        </div>
+
+        <div class="code-note"><strong>기록과 코드의 차이</strong> · 현재 코드의 기본 감지 거리는 5,000cm이며 시야각 대신 화면 내부 여부를 검사한다. 기존 <code>History.md</code>에는 시야각 90도와 감지 거리 2,000cm로 기록되어 있다. 값은 편집 가능하므로 실제 게임에서 적용된 설정은 별도 확인이 필요하다. 후보가 없으면 접근에 실패한다.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <span>로봇대전 · 기능 기획서 (조작 · 에임 타겟 · 이동 AI)</span>
+      <span><a href="로봇대전_기획서.html">메인 허브로 돌아가기</a></span>
+    </div>
+  </footer>
+</body>
+</html>

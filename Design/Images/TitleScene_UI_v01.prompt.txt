@@ -1,0 +1,9 @@
+Use case: ui-mockup
+Asset type: Korean robot combat game's title screen concept, landscape 16:9.
+Primary request: Create one polished game title screen with cinematic background and fully integrated readable Korean menu UI.
+Input image: reference image only, the project's existing white armored alien-core mech design. Preserve recognizable cranial cockpit, exposed mechanical joints, slender tall proportions, and purple energy accents.
+Scene/backdrop: invaded Earth, devastated city skyline, atmospheric smoke and distant fires. A towering reference-style mech occupies the right half; its silhouette remains readable. No extra foreground characters. Earth is the setting, do not depict a second planet hovering over the city.
+Style/medium: high-end Unreal Engine cinematic realistic science fiction game screenshot with elegant restrained interface.
+Composition: left third reserved for title and vertical menu, right half cinematic mech. Dark translucent backing and ample whitespace keep menu legible. Full screen edge to edge; no desktop, browser frame or device mockup.
+Text (verbatim): large title "로봇대전"; four menu buttons vertically "시작", "로그인", "설정", "종료". Render all Korean exactly, clear typesetting. "시작" is highlighted as the primary selection, other three understated secondary buttons. Title larger than menu. No slogan, no English labels, no invented stats, no HUD.
+Constraints: readable interface is essential; menu contrasts against background, consistent spacing, subtle borders and purple highlight matching mech. This is title screen, no training or combat mode selection here. Opaque background.

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>로봇대전 | TEAM 휴머트로닉 — 씬: 퀘스트 · 전투 · 결과</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="로봇대전_기획서.html"><span class="brand-mark" aria-hidden="true">H</span> 로봇대전 <span class="muted">/ TEAM 휴머트로닉</span></a>
+      <nav aria-label="문서 목차">
+        <a href="로봇대전_기획서.html">메인 · 전체 흐름</a>
+        <a href="Scene_Title_Lobby.html">씬: 타이틀·로비·노심</a>
+        <a href="Scene_Shop.html">씬: 상점</a>
+        <a href="Scene_Training.html">씬: 훈련소</a>
+        <a class="active" href="Scene_Combat_Quest.html">씬: 퀘스트·전투·결과</a>
+        <a href="Feature_Control_Targeting.html">기능: 조작·타겟·이동AI</a>
+        <a href="Feature_Voice_Evaluation.html">기능: 음성·평가·성장</a>
+        <a href="Feature_Character_Setting.html">캐릭터 설정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="quests">
+      <div class="shell">
+        <div class="section-head">
+          <div><p class="eyebrow">SCENE 05–07 / 퀘스트 선택 · 전투 스테이지 · 전투 결과</p><h2>싸우며 지구와 로봇을 되찾는다</h2></div>
+          <p class="section-desc">로비에서 전투모드로 진입해 임무를 고르고, 직접 조준 공격과 음성 이동으로 전투를 수행한 뒤 결과 화면에서 보상과 평가 반영을 확인한다.</p>
+        </div>
+
+        <div class="quest-grid" aria-label="퀘스트 종류 예시">
+          <article class="quest-card"><span>01 / ASSAULT</span><h3>적 기지 침공</h3></article>
+          <article class="quest-card"><span>02 / DEFENSE</span><h3>아군 기지 방어</h3></article>
+          <article class="quest-card"><span>03 / RAID</span><h3>적 물자 약탈전</h3></article>
+        </div>
+
+        <div class="reward-grid">
+          <article class="reward-card"><p class="eyebrow">명시적 보상</p><h3>전투의 성과</h3><p>명예, 공훈, 재화와 노획품을 보상으로 얻는다. 어떤 보상을 얼마나 주는지는 퀘스트의 성격에 따라 달라지며, 전투 성공 시에만 지급한다(실패·중도 포기 시 제외).</p><div class="tag-list"><span class="tag">명예</span><span class="tag">공훈</span><span class="tag">재화</span><span class="tag">노획품</span></div></article>
+          <article class="reward-card implicit"><p class="eyebrow">암시적 보상</p><h3>서로 잘 통하는 동료</h3><p>전투 중 카운팅된 음성 평가를 전투 종료(성공·실패·중도 포기 모두 포함) 시 결과 씬에서 일괄 반영해 액션 선택 확률과 적합성, 레벨, 유대를 조정한다. 성장에 따라 한 번의 발화에서 연속으로 처리할 수 있는 이동 명령의 수가 늘어난다.</p><div class="tag-list"><span class="tag">적합성</span><span class="tag">레벨</span><span class="tag">유대</span></div></article>
+        </div>
+
+        <div class="scene-examples">
+          <article class="scene-example" id="scene-quest">
+            <p class="eyebrow">화면 04 / 퀘스트 선택 씬</p><h3>임무를 고르고 목표와 보상을 확인해 출격한다</h3>
+            <figure><a href="Images/QuestSelectScene_UI_v01.png" target="_blank" rel="noopener"><img src="Images/QuestSelectScene_UI_v01.png" alt="적 기지 침공, 아군 기지 방어, 적 물자 약탈전 목록과 전투 지역 지도, 선택 임무 목표, 난이도, 예상 보상, 출격 버튼이 있는 퀘스트 선택 시안" loading="lazy"></a><figcaption>기능: 독립된 퀘스트 선택 씬에서 임무 목록과 지도를 통해 전투 지역을 선택한다. 선택한 임무의 이름과 지도 표시를 연동하고, 오른쪽에 목표·난이도·예상 보상을 보여준다. 내용을 확인한 뒤 출격을 누르면 선택한 전투 스테이지 씬으로 진입한다.</figcaption></figure>
+            <div class="core-stages" style="margin-top:18px" aria-label="퀘스트 선택과 출격 순서">
+              <div><span>01 / 임무 선택</span><strong>목록과 지도에서 임무를 고른다</strong></div>
+              <div><span>02 / 목표 확인</span><strong>선택한 임무의 전투 목적을 확인한다</strong></div>
+              <div><span>03 / 조건 확인</span><strong>난이도와 예상 보상을 살핀다</strong></div>
+              <div><span>04 / 출격</span><strong>선택한 전투 스테이지에 진입한다</strong></div>
+            </div>
+            <p class="scene-note">확정 진입 흐름: 로비 · 기지 → 퀘스트 선택 씬 → 전투 스테이지 씬. 출격 전에 기지(로비)로 돌아갈 수 있다.</p>
+          </article>
+
+          <article class="scene-example" id="scene-combat">
+            <p class="eyebrow">화면 05 / 전투모드 스테이지 씬</p><h3>공격은 직접 조준하고, 이동은 말로 지시한다</h3>
+            <figure><a href="Images/CombatScene_UI_v01.png" target="_blank" rel="noopener"><img src="Images/CombatScene_UI_v01.png" alt="중앙 조준으로 적을 공격하는 로봇과 임무 목표, 내구도, 에너지, 무기 상태, 음성 명령과 실행 중인 이동 액션을 표시한 전투모드 시안" loading="lazy"></a><figcaption>기능: 화면 중앙의 조준으로 적을 겨냥하고 직접 공격한다. 하단에는 인식한 음성 명령, 선택 액션, 실행 상태를 함께 표시해 로봇이 말을 어떻게 받아들였는지 확인한다. 임무 목표·내구도·에너지·무기 상태는 화면 가장자리에 배치해 전장을 가리지 않는다.</figcaption></figure>
+            <div class="core-stages" style="margin-top:18px" aria-label="전투 중 공격과 이동의 역할">
+              <div><span>01 / 직접 공격</span><strong>중앙 조준으로 겨냥하고 공격한다</strong></div>
+              <div><span>02 / 음성 이동</span><strong>명령을 말하고 선택 액션을 확인한다</strong></div>
+              <div><span>03 / 평가 카운팅</span><strong>칭찬·비난을 직전 명령(연속 묶음 전체)에 카운팅한다</strong></div>
+              <div><span>04 / 종료 후 결과 씬</span><strong>성공·실패·중도 포기 모두 전투 결과 씬으로 이동한다</strong></div>
+            </div>
+            <div class="scene-links">
+              <a href="Feature_Control_Targeting.html">조작·타겟팅·이동 AI 상세 보기 →</a>
+              <a href="Feature_Voice_Evaluation.html">음성 파이프라인·평가 카운팅 상세 보기 →</a>
+            </div>
+          </article>
+
+          <article class="scene-example" id="scene-result">
+            <p class="eyebrow">화면 06 / 전투 결과 씬</p><h3>전투의 성과와 함께 쌓은 성장을 확인한다</h3>
+            <figure><a href="Images/BattleResultScene_UI_v01.png" target="_blank" rel="noopener"><img src="Images/BattleResultScene_UI_v01.png" alt="임무 성공 표시, 명예와 공훈과 재화 및 노획품 보상, 음성 명령과 발동 액션에 연결된 평가 반영, 전투 전후 성장 변화, 기지 복귀 버튼이 있는 전투 결과 시안" loading="lazy"></a><figcaption>기능: 전투의 성공·실패·중도 포기 결과와 획득 보상·노획품을 확인한다. 음성 평가는 명령·발동 액션·카운팅 기록과 반영 상태를 연결해 보여주고, 적합성·레벨·유대의 전투 전후 값을 비교한다.</figcaption></figure>
+            <div class="core-stages" style="margin-top:18px" aria-label="전투 종료 후 확인과 복귀 순서">
+              <div><span>01 / 전투 결과</span><strong>임무 성공·실패·중도 포기를 확인한다</strong></div>
+              <div><span>02 / 보상</span><strong>성공 시에만 명예·공훈·재화와 노획품을 지급한다</strong></div>
+              <div><span>03 / 평가·성장</span><strong>성공·실패·중도 포기 모두 누적 카운팅된 평가를 일괄 반영한다</strong></div>
+              <div><span>04 / 복귀</span><strong>기지로 돌아가 다음 활동을 고른다</strong></div>
+            </div>
+            <p class="scene-note">확정 규칙: 전투 성공·실패뿐 아니라 중도 포기(퇴각) 시에도 반드시 전투 결과 씬을 거친 뒤 로비로 복귀한다. 실패 및 중도 포기 시에는 명시적 보상만 제외하며, 전투 중 그때까지 카운팅된 음성 평가는 모두 결과 씬에서 일괄 적용한다(반영 폭 및 밸런스는 성장 계산식으로 제어). 퀘스트 선택 브리핑·전황 중계·결과 정산 안내는 2등신 홀로그램 메카 백호 마스코트인 <strong>작전 오퍼레이터 ‘홀랑이’</strong>가 전담한다.</p>
+            <div class="scene-links">
+              <a href="Scene_Title_Lobby.html">← 기지(로비) 기획으로 돌아가기</a>
+              <a href="Feature_Character_Setting.html#char-operator">작전 오퍼레이터 ‘홀랑이’ 캐릭터 상세 설정 보기 →</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><span>로봇대전 · 씬 기획서 (퀘스트 · 전투 · 결과)</span><a href="로봇대전_기획서.html">← 메인 허브로 돌아가기</a></div></footer>
+</body>
+</html>

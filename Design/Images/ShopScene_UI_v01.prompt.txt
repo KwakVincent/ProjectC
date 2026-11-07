@@ -1,0 +1,15 @@
+Use case: ui-mockup
+Asset type: landscape 16:9 Korean robot combat game's base shop screen with integrated practical game interface.
+Input images: Image 1 is the approved lobby screen, style reference for resistance-base hangar, charcoal panels, restrained purple accents and crisp Korean typography. Image 2 is character reference for the player's white armored tall slender mech with exposed joints, cranial cockpit and purple core lighting.
+Primary request: A readable usable equipment shop showing category browsing, selected item preview on robot, before/after comparison, purchase, and a distinctly separate area for selling captured materials and alien cores.
+Scene/backdrop: quiet industrial equipment bay inside the player's base, same universe as lobby. Player mech displayed full height in center, with selected primary weapon highlighted with a faint purple outline at its forearm. No battlefield, crosshair or combat HUD.
+Composition: clean three-column layout. Left narrow equipment catalogue; center wide robot and selected weapon preview; right comparison and purchase panel plus compact separate captured-loot sale panel below. Everything within safe margins, readable large type and restrained ornament.
+Exact Korean text:
+Top left title "상점"; top right "보유 재화" with neutral dash value, corner button "기지로 돌아가기".
+Across upper catalogue area four category tabs exactly "로봇 파츠", "무기", "방어구", "보조장치·유틸리티". "무기" selected.
+Left catalogue heading "상품 목록", four visually distinct weapon thumbnail cards without invented item names or prices. One selected card highlighted purple and labelled "선택 장비".
+Center heading "장비 미리보기", small selected weapon inset labelled "주 무기". Show the robot's appearance and the selected weapon together clearly.
+Right panel heading "성능 비교", columns "현재 장비" and "선택 장비". Rows "공격력", "에너지 소모", "중량", all values neutral dashes, no numbers. Below "구매 가격" with dash and highlighted primary button "구매하기".
+Distinct lower-right panel heading "노획품 판매", two icon tiles exactly "노획 물자" and "노심", secondary button exactly "판매하기". The core icon is a small alien energy module, not a currency logo. Sale area must clearly be for captured inventory, separate from selected purchase.
+Style: polished Unreal Engine cinematic realistic 3D hangar and mech, crisp professional game UI, subtle purple active state and neutral dark translucent panels. Bright enough to read equipment details. Clean aligned spacing.
+Constraints: exact Korean, no English, no invented currency name, numeric costs, stats, rarity levels, upgrade systems or automatic core replacement. Show selection preview, not purchase completion. No browser, desktop/device frame, speech-input/training controls or combat overlays. Opaque full-screen concept image.
